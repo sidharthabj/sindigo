@@ -30,7 +30,7 @@
 ```
 /
 ├── PLAN.md
-├── middleware.ts                          # Route protection (auth guard)
+├── proxy.ts                               # Route protection (auth guard, Next.js 16 convention)
 ├── vitest.config.ts
 ├── vitest.setup.ts
 ├── supabase/
@@ -98,7 +98,7 @@
 - Create: `vitest.config.ts`
 - Create: `vitest.setup.ts`
 
-- [ ] **Step 1: Scaffold Next.js app**
+- [x] **Step 1: Scaffold Next.js app**
 
 ```bash
 npx create-next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias "@/*" --yes
@@ -106,19 +106,19 @@ npx create-next-app@latest . --typescript --tailwind --eslint --app --no-src-dir
 
 Expected: Next.js project created in current directory.
 
-- [ ] **Step 2: Install runtime dependencies**
+- [x] **Step 2: Install runtime dependencies**
 
 ```bash
 npm install @supabase/supabase-js @supabase/ssr framer-motion
 ```
 
-- [ ] **Step 3: Install dev dependencies**
+- [x] **Step 3: Install dev dependencies**
 
 ```bash
 npm install -D vitest @vitejs/plugin-react @testing-library/react @testing-library/user-event @testing-library/jest-dom jsdom supabase
 ```
 
-- [ ] **Step 4: Create `vitest.config.ts`**
+- [x] **Step 4: Create `vitest.config.ts`**
 
 ```typescript
 import { defineConfig } from 'vitest/config'
@@ -138,13 +138,13 @@ export default defineConfig({
 })
 ```
 
-- [ ] **Step 5: Create `vitest.setup.ts`**
+- [x] **Step 5: Create `vitest.setup.ts`**
 
 ```typescript
 import '@testing-library/jest-dom'
 ```
 
-- [ ] **Step 6: Add test script to `package.json`**
+- [x] **Step 6: Add test script to `package.json`**
 
 Add to the `"scripts"` block:
 ```json
@@ -152,7 +152,7 @@ Add to the `"scripts"` block:
 "test:run": "vitest run"
 ```
 
-- [ ] **Step 7: Initialize shadcn/ui**
+- [x] **Step 7: Initialize shadcn/ui**
 
 ```bash
 npx shadcn@latest init --defaults
@@ -160,13 +160,13 @@ npx shadcn@latest init --defaults
 
 When prompted, select: Default style, Slate base color, CSS variables: yes.
 
-- [ ] **Step 8: Install required shadcn components**
+- [x] **Step 8: Install required shadcn components**
 
 ```bash
 npx shadcn@latest add button card dialog input label avatar badge textarea separator
 ```
 
-- [ ] **Step 9: Verify the app starts**
+- [x] **Step 9: Verify the app starts**
 
 ```bash
 npm run dev
@@ -174,7 +174,7 @@ npm run dev
 
 Expected: App runs at `http://localhost:3000` with the default Next.js page.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add -A
@@ -189,17 +189,17 @@ git commit -m "feat: initialize Next.js project with shadcn/ui and Vitest"
 - Create: `supabase/migrations/20260606000001_schema.sql`
 - Create: `.env.local`
 
-- [ ] **Step 1: Create Supabase project**
+- [x] **Step 1: Create Supabase project**
 
 Go to https://supabase.com → New project. Note your project URL and anon key.
 
-- [ ] **Step 2: Initialize Supabase CLI locally**
+- [x] **Step 2: Initialize Supabase CLI locally**
 
 ```bash
 npx supabase init
 ```
 
-- [ ] **Step 3: Create `.env.local`**
+- [x] **Step 3: Create `.env.local`**
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
@@ -209,7 +209,7 @@ GOOGLE_BOOKS_API_KEY=your-google-books-api-key
 
 Get the Google Books API key: https://console.cloud.google.com → enable Books API → create API key.
 
-- [ ] **Step 4: Write migration `supabase/migrations/20260606000001_schema.sql`**
+- [x] **Step 4: Write migration `supabase/migrations/20260606000001_schema.sql`**
 
 ```sql
 -- Enums
@@ -303,7 +303,7 @@ CREATE TRIGGER shelf_entries_updated_at
   FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
 ```
 
-- [ ] **Step 5: Write migration `supabase/migrations/20260606000002_rls.sql`**
+- [x] **Step 5: Write migration `supabase/migrations/20260606000002_rls.sql`**
 
 ```sql
 ALTER TABLE profiles     ENABLE ROW LEVEL SECURITY;
@@ -348,7 +348,7 @@ CREATE POLICY "comments_owner_insert" ON comments FOR INSERT WITH CHECK (auth.ui
 CREATE POLICY "comments_owner_delete" ON comments FOR DELETE USING (auth.uid() = user_id);
 ```
 
-- [ ] **Step 6: Write migration `supabase/migrations/20260606000003_triggers.sql`**
+- [x] **Step 6: Write migration `supabase/migrations/20260606000003_triggers.sql`**
 
 ```sql
 -- Auto-create profile row when a new auth user signs up
@@ -382,11 +382,11 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE FUNCTION handle_new_user();
 ```
 
-- [ ] **Step 7: Run migrations in Supabase dashboard**
+- [x] **Step 7: Run migrations in Supabase dashboard**
 
 Copy the contents of each migration file and run them in order in the Supabase SQL Editor (https://supabase.com/dashboard → your project → SQL Editor).
 
-- [ ] **Step 8: Generate TypeScript types**
+- [x] **Step 8: Generate TypeScript types**
 
 ```bash
 npx supabase gen types typescript --project-id YOUR_PROJECT_ID --schema public > lib/types/database.ts
@@ -394,7 +394,7 @@ npx supabase gen types typescript --project-id YOUR_PROJECT_ID --schema public >
 
 Replace `YOUR_PROJECT_ID` with your Supabase project ID (visible in the project URL).
 
-- [ ] **Step 9: Create `lib/types/index.ts`**
+- [x] **Step 9: Create `lib/types/index.ts`**
 
 ```typescript
 import type { Database } from './database'
@@ -425,7 +425,7 @@ export type ActivityWithDetails = Activity & {
 }
 ```
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add -A
@@ -441,7 +441,7 @@ git commit -m "feat: add database schema, RLS policies, and type definitions"
 - Create: `lib/supabase/server.ts`
 - Create: `middleware.ts`
 
-- [ ] **Step 1: Write failing test for middleware redirect logic**
+- [x] **Step 1: Write failing test for middleware redirect logic**
 
 Create `middleware.test.ts`:
 
@@ -469,7 +469,7 @@ describe('route classification', () => {
 })
 ```
 
-- [ ] **Step 2: Run test to confirm it fails**
+- [x] **Step 2: Run test to confirm it fails**
 
 ```bash
 npm run test:run middleware.test.ts
@@ -477,7 +477,7 @@ npm run test:run middleware.test.ts
 
 Expected: FAIL (file not found / import errors)
 
-- [ ] **Step 3: Create `lib/supabase/client.ts`**
+- [x] **Step 3: Create `lib/supabase/client.ts`**
 
 ```typescript
 import { createBrowserClient } from '@supabase/ssr'
@@ -491,7 +491,7 @@ export function createClient() {
 }
 ```
 
-- [ ] **Step 4: Create `lib/supabase/server.ts`**
+- [x] **Step 4: Create `lib/supabase/server.ts`**
 
 ```typescript
 import { createServerClient } from '@supabase/ssr'
@@ -519,7 +519,7 @@ export async function createClient() {
 }
 ```
 
-- [ ] **Step 5: Create `middleware.ts`**
+- [x] **Step 5: Create `middleware.ts`**
 
 ```typescript
 import { createServerClient } from '@supabase/ssr'
@@ -569,7 +569,7 @@ export const config = {
 }
 ```
 
-- [ ] **Step 6: Run test to confirm it passes**
+- [x] **Step 6: Run test to confirm it passes**
 
 ```bash
 npm run test:run middleware.test.ts
@@ -577,7 +577,7 @@ npm run test:run middleware.test.ts
 
 Expected: 6 tests PASS
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add lib/supabase/client.ts lib/supabase/server.ts middleware.ts middleware.test.ts
@@ -595,7 +595,7 @@ git commit -m "feat: add Supabase clients and route protection middleware"
 - Create: `app/(auth)/login/page.tsx`
 - Create: `app/(auth)/signup/page.tsx`
 
-- [ ] **Step 1: Update `app/layout.tsx`**
+- [x] **Step 1: Update `app/layout.tsx`**
 
 ```typescript
 import type { Metadata } from 'next'
@@ -622,7 +622,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-- [ ] **Step 2: Create `components/layout/navbar.tsx`**
+- [x] **Step 2: Create `components/layout/navbar.tsx`**
 
 ```typescript
 import Link from 'next/link'
@@ -657,7 +657,7 @@ export async function Navbar() {
 }
 ```
 
-- [ ] **Step 3: Create `app/(auth)/login/page.tsx`**
+- [x] **Step 3: Create `app/(auth)/login/page.tsx`**
 
 ```typescript
 'use client'
@@ -725,7 +725,7 @@ export default function LoginPage() {
 }
 ```
 
-- [ ] **Step 4: Create `app/(auth)/signup/page.tsx`**
+- [x] **Step 4: Create `app/(auth)/signup/page.tsx`**
 
 ```typescript
 'use client'
@@ -793,7 +793,7 @@ export default function SignupPage() {
 }
 ```
 
-- [ ] **Step 5: Create OAuth callback route `app/auth/callback/route.ts`**
+- [x] **Step 5: Create OAuth callback route `app/auth/callback/route.ts`**
 
 ```typescript
 import { createClient } from '@/lib/supabase/server'
@@ -810,11 +810,11 @@ export async function GET(request: Request) {
 }
 ```
 
-- [ ] **Step 6: Enable Google OAuth in Supabase**
+- [x] **Step 6: Enable Google OAuth in Supabase**
 
 In Supabase dashboard → Authentication → Providers → Google → enable and add your Google Cloud OAuth client ID and secret.
 
-- [ ] **Step 7: Verify auth flow works end-to-end**
+- [x] **Step 7: Verify auth flow works end-to-end**
 
 ```bash
 npm run dev
@@ -822,7 +822,7 @@ npm run dev
 
 Visit `http://localhost:3000/login`, sign up with email, confirm you land on `/feed`, confirm `/feed` redirects to `/login` when logged out.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add -A

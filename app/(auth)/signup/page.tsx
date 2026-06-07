@@ -14,16 +14,22 @@ export default function SignupPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [checkEmail, setCheckEmail] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError(null)
     const supabase = createClient()
-    const { error } = await supabase.auth.signUp({ email, password })
-    if (error) { setError(error.message); setLoading(false); return }
-    router.push('/feed')
-    router.refresh()
+    const { data, error } = await supabase.auth.signUp({ email, password })
+    setLoading(false)
+    if (error) { setError(error.message); return }
+    if (data.session) {
+      router.push('/feed')
+      router.refresh()
+    } else {
+      setCheckEmail(true)
+    }
   }
 
   async function handleGoogle() {
@@ -32,6 +38,17 @@ export default function SignupPage() {
       provider: 'google',
       options: { redirectTo: `${location.origin}/auth/callback` },
     })
+  }
+
+  if (checkEmail) {
+    return (
+      <div className="max-w-sm mx-auto mt-16 px-4 text-center">
+        <h1 className="text-2xl font-bold mb-4">Check your email</h1>
+        <p className="text-muted-foreground">
+          We sent a confirmation link to <strong>{email}</strong>. Click it to finish creating your account.
+        </p>
+      </div>
+    )
   }
 
   return (
