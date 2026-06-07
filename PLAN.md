@@ -15,7 +15,7 @@
 | Phase | Status | Milestone |
 |-------|--------|-----------|
 | Phase 1: Foundation | ✅ Complete | App boots, auth works, DB schema live |
-| Phase 2: Profiles | ⬜ Not Started | Profile pages + follow/unfollow working |
+| Phase 2: Profiles | 🚧 In Progress | Profile pages + follow/unfollow working |
 | Phase 3: Books & Shelves | ⬜ Not Started | Add/move/display books on shelves |
 | Phase 4: Book Detail | ⬜ Not Started | Book detail page with opening animation |
 | Phase 5: Activity Feed | ⬜ Not Started | Feed with likes and comments |
@@ -847,7 +847,7 @@ Update the Project Status table at the top of this file to ✅ Complete before s
 - Create: `components/books/book-card.tsx`
 - Create: `components/books/rating.tsx`
 
-- [ ] **Step 1: Write failing test for Rating component**
+- [x] **Step 1: Write failing test for Rating component**
 
 Create `components/books/rating.test.tsx`:
 
@@ -876,7 +876,7 @@ describe('Rating', () => {
 })
 ```
 
-- [ ] **Step 2: Run test to confirm it fails**
+- [x] **Step 2: Run test to confirm it fails**
 
 ```bash
 npm run test:run components/books/rating.test.tsx
@@ -884,7 +884,7 @@ npm run test:run components/books/rating.test.tsx
 
 Expected: FAIL
 
-- [ ] **Step 3: Create `components/books/rating.tsx`**
+- [x] **Step 3: Create `components/books/rating.tsx`**
 
 ```typescript
 import { BookOpen } from 'lucide-react'
@@ -924,7 +924,7 @@ export function Rating({ value, onChange, className }: RatingProps) {
 }
 ```
 
-- [ ] **Step 4: Run test to confirm it passes**
+- [x] **Step 4: Run test to confirm it passes**
 
 ```bash
 npm run test:run components/books/rating.test.tsx
@@ -932,7 +932,7 @@ npm run test:run components/books/rating.test.tsx
 
 Expected: 3 tests PASS
 
-- [ ] **Step 5: Create `components/books/book-card.tsx`**
+- [x] **Step 5: Create `components/books/book-card.tsx`**
 
 ```typescript
 import Image from 'next/image'
@@ -980,7 +980,7 @@ export function BookCard({ entry, username }: BookCardProps) {
 }
 ```
 
-- [ ] **Step 6: Create `components/books/shelf-section.tsx`**
+- [x] **Step 6: Create `components/books/shelf-section.tsx`**
 
 ```typescript
 import { BookCard } from './book-card'
@@ -1015,7 +1015,7 @@ export function ShelfSection({ title, entries, username, horizontal }: ShelfSect
 }
 ```
 
-- [ ] **Step 7: Create `components/profile/profile-header.tsx`**
+- [x] **Step 7: Create `components/profile/profile-header.tsx`**
 
 ```typescript
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -1072,7 +1072,7 @@ export function ProfileHeader({
 }
 ```
 
-- [ ] **Step 8: Create `app/[username]/page.tsx`**
+- [x] **Step 8: Create `app/[username]/page.tsx`**
 
 ```typescript
 import { createClient } from '@/lib/supabase/server'
@@ -1138,7 +1138,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
 }
 ```
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add -A
