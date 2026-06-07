@@ -7,193 +7,273 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   public: {
     Tables: {
-      profiles: {
+      activities: {
         Row: {
+          activity_type: Database["public"]["Enums"]["activity_type"]
+          created_at: string | null
           id: string
-          username: string
-          display_name: string
-          bio: string | null
-          avatar_url: string | null
-          created_at: string
+          shelf_entry_id: string
+          user_id: string
         }
         Insert: {
-          id: string
-          username: string
-          display_name: string
-          bio?: string | null
-          avatar_url?: string | null
-          created_at?: string
+          activity_type: Database["public"]["Enums"]["activity_type"]
+          created_at?: string | null
+          id?: string
+          shelf_entry_id: string
+          user_id: string
         }
         Update: {
+          activity_type?: Database["public"]["Enums"]["activity_type"]
+          created_at?: string | null
           id?: string
-          username?: string
-          display_name?: string
-          bio?: string | null
-          avatar_url?: string | null
-          created_at?: string
+          shelf_entry_id?: string
+          user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "activities_shelf_entry_id_fkey"
+            columns: ["shelf_entry_id"]
+            isOneToOne: false
+            referencedRelation: "shelf_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       books: {
         Row: {
-          id: string
-          google_books_id: string
-          title: string
           authors: string[]
           cover_url: string | null
+          created_at: string | null
           description: string | null
-          published_year: number | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
           google_books_id: string
+          id: string
+          published_year: number | null
           title: string
+        }
+        Insert: {
           authors?: string[]
           cover_url?: string | null
+          created_at?: string | null
           description?: string | null
+          google_books_id: string
+          id?: string
           published_year?: number | null
-          created_at?: string
+          title: string
         }
         Update: {
-          id?: string
+          authors?: string[]
+          cover_url?: string | null
+          created_at?: string | null
+          description?: string | null
           google_books_id?: string
-          title?: string
-          authors?: string[]
-          cover_url?: string | null
-          description?: string | null
+          id?: string
           published_year?: number | null
-          created_at?: string
-        }
-        Relationships: []
-      }
-      shelf_entries: {
-        Row: {
-          id: string
-          user_id: string
-          book_id: string
-          status: 'wishlist' | 'reading' | 'read'
-          rating: number | null
-          note: string | null
-          started_at: string | null
-          finished_at: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          book_id: string
-          status: 'wishlist' | 'reading' | 'read'
-          rating?: number | null
-          note?: string | null
-          started_at?: string | null
-          finished_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          book_id?: string
-          status?: 'wishlist' | 'reading' | 'read'
-          rating?: number | null
-          note?: string | null
-          started_at?: string | null
-          finished_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      follows: {
-        Row: {
-          follower_id: string
-          following_id: string
-          created_at: string
-        }
-        Insert: {
-          follower_id: string
-          following_id: string
-          created_at?: string
-        }
-        Update: {
-          follower_id?: string
-          following_id?: string
-          created_at?: string
-        }
-        Relationships: []
-      }
-      activities: {
-        Row: {
-          id: string
-          user_id: string
-          activity_type: 'added_wishlist' | 'started_reading' | 'finished_book' | 'wrote_review'
-          shelf_entry_id: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          activity_type: 'added_wishlist' | 'started_reading' | 'finished_book' | 'wrote_review'
-          shelf_entry_id: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          activity_type?: 'added_wishlist' | 'started_reading' | 'finished_book' | 'wrote_review'
-          shelf_entry_id?: string
-          created_at?: string
-        }
-        Relationships: []
-      }
-      likes: {
-        Row: {
-          id: string
-          user_id: string
-          activity_id: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          activity_id: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          activity_id?: string
-          created_at?: string
+          title?: string
         }
         Relationships: []
       }
       comments: {
         Row: {
+          activity_id: string
+          content: string
+          created_at: string | null
           id: string
           user_id: string
-          activity_id: string
-          content: string
-          created_at: string
         }
         Insert: {
-          id?: string
-          user_id: string
           activity_id: string
           content: string
-          created_at?: string
+          created_at?: string | null
+          id?: string
+          user_id: string
         }
         Update: {
-          id?: string
-          user_id?: string
           activity_id?: string
           content?: string
-          created_at?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      follows: {
+        Row: {
+          created_at: string | null
+          follower_id: string
+          following_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          follower_id: string
+          following_id: string
+        }
+        Update: {
+          created_at?: string | null
+          follower_id?: string
+          following_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_following_id_fkey"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      likes: {
+        Row: {
+          activity_id: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          activity_id?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "likes_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          display_name: string
+          id: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name: string
+          id: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string
+          id?: string
+          username?: string
         }
         Relationships: []
+      }
+      shelf_entries: {
+        Row: {
+          book_id: string
+          created_at: string | null
+          finished_at: string | null
+          id: string
+          note: string | null
+          rating: number | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["shelf_status"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string | null
+          finished_at?: string | null
+          id?: string
+          note?: string | null
+          rating?: number | null
+          started_at?: string | null
+          status: Database["public"]["Enums"]["shelf_status"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string | null
+          finished_at?: string | null
+          id?: string
+          note?: string | null
+          rating?: number | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["shelf_status"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shelf_entries_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shelf_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -203,11 +283,146 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      shelf_status: 'wishlist' | 'reading' | 'read'
-      activity_type: 'added_wishlist' | 'started_reading' | 'finished_book' | 'wrote_review'
+      activity_type:
+        | "added_wishlist"
+        | "started_reading"
+        | "finished_book"
+        | "wrote_review"
+      shelf_status: "wishlist" | "reading" | "read"
     }
     CompositeTypes: {
       [_ in never]: never
     }
   }
 }
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      activity_type: [
+        "added_wishlist",
+        "started_reading",
+        "finished_book",
+        "wrote_review",
+      ],
+      shelf_status: ["wishlist", "reading", "read"],
+    },
+  },
+} as const
