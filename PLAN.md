@@ -14,7 +14,7 @@
 
 | Phase | Status | Milestone |
 |-------|--------|-----------|
-| Phase 1: Foundation | ⬜ Not Started | App boots, auth works, DB schema live |
+| Phase 1: Foundation | ✅ Complete | App boots, auth works, DB schema live |
 | Phase 2: Profiles | ⬜ Not Started | Profile pages + follow/unfollow working |
 | Phase 3: Books & Shelves | ⬜ Not Started | Add/move/display books on shelves |
 | Phase 4: Book Detail | ⬜ Not Started | Book detail page with opening animation |
