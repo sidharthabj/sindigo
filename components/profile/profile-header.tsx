@@ -41,7 +41,6 @@ export function ProfileHeader({
           <Link href="/settings" className={cn(buttonVariants({ variant: 'outline' }))}>Edit profile</Link>
         ) : currentUserId ? (
           <FollowButton
-            followerId={currentUserId}
             followingId={profile.id}
             initialIsFollowing={isFollowing}
             username={profile.username}

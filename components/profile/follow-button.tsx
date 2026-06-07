@@ -5,13 +5,12 @@ import { Button } from '@/components/ui/button'
 import { followUser, unfollowUser } from '@/lib/actions/follows'
 
 interface FollowButtonProps {
-  followerId: string
   followingId: string
   initialIsFollowing: boolean
   username: string
 }
 
-export function FollowButton({ followerId, followingId, initialIsFollowing, username }: FollowButtonProps) {
+export function FollowButton({ followingId, initialIsFollowing, username }: FollowButtonProps) {
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing)
   const [loading, setLoading] = useState(false)
 
