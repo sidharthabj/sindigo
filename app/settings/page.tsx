@@ -1,11 +1,12 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { updateProfile } from '@/lib/actions/profile'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function SettingsPage() {
@@ -15,6 +16,7 @@ export default function SettingsPage() {
   const [bio, setBio] = useState('')
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const originalUsername = useRef('')
 
   useEffect(() => {
     const supabase = createClient()
@@ -25,6 +27,7 @@ export default function SettingsPage() {
         setDisplayName(data.display_name)
         setUsername(data.username)
         setBio(data.bio ?? '')
+        originalUsername.current = data.username
       }
     })
   }, [])
@@ -33,17 +36,21 @@ export default function SettingsPage() {
     e.preventDefault()
     setSaving(true)
     setMessage(null)
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    const { error } = await supabase
-      .from('profiles')
-      .update({ display_name: displayName, username, bio })
-      .eq('id', user.id)
-    setSaving(false)
-    if (error) { setMessage(error.message); return }
-    setMessage('Saved!')
-    router.refresh()
+    try {
+      await updateProfile({ displayName, username, bio })
+      const usernameChanged = username !== originalUsername.current
+      originalUsername.current = username
+      if (usernameChanged) {
+        router.push(`/${username}`)
+      } else {
+        setMessage('Saved!')
+        router.refresh()
+      }
+    } catch (err: any) {
+      setMessage(err.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   async function handleSignOut() {
