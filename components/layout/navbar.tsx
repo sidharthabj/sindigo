@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 export async function Navbar() {
   const supabase = await createClient()
@@ -14,14 +15,14 @@ export async function Navbar() {
       <div className="flex gap-2">
         {user ? (
           <>
-            <Link href="/feed"><Button variant="ghost">Feed</Button></Link>
-            <Link href="/search"><Button variant="ghost">Add Book</Button></Link>
-            <Link href="/settings"><Button variant="ghost">Settings</Button></Link>
+            <Link href="/feed" className={cn(buttonVariants({ variant: 'ghost' }))}>Feed</Link>
+            <Link href="/search" className={cn(buttonVariants({ variant: 'ghost' }))}>Add Book</Link>
+            <Link href="/settings" className={cn(buttonVariants({ variant: 'ghost' }))}>Settings</Link>
           </>
         ) : (
           <>
-            <Link href="/login"><Button variant="ghost">Log in</Button></Link>
-            <Link href="/signup"><Button>Sign up</Button></Link>
+            <Link href="/login" className={cn(buttonVariants({ variant: 'ghost' }))}>Log in</Link>
+            <Link href="/signup" className={cn(buttonVariants({ variant: 'default' }))}>Sign up</Link>
           </>
         )}
       </div>
