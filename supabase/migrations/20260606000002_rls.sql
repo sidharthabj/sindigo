@@ -8,16 +8,16 @@ ALTER TABLE comments     ENABLE ROW LEVEL SECURITY;
 
 -- Profiles
 CREATE POLICY "profiles_public_read"  ON profiles FOR SELECT USING (true);
-CREATE POLICY "profiles_owner_update" ON profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "profiles_owner_update" ON profiles FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
 
 -- Books (public catalog, any authed user can insert)
 CREATE POLICY "books_public_read"       ON books FOR SELECT USING (true);
-CREATE POLICY "books_authed_insert"     ON books FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "books_authed_insert"     ON books FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
 -- Shelf entries (public read, owner manages)
 CREATE POLICY "shelf_public_read"   ON shelf_entries FOR SELECT USING (true);
 CREATE POLICY "shelf_owner_insert"  ON shelf_entries FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "shelf_owner_update"  ON shelf_entries FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "shelf_owner_update"  ON shelf_entries FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "shelf_owner_delete"  ON shelf_entries FOR DELETE USING (auth.uid() = user_id);
 
 -- Follows

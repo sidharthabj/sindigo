@@ -7,7 +7,12 @@ DECLARE
   counter       INTEGER := 0;
 BEGIN
   base_username := LOWER(REGEXP_REPLACE(SPLIT_PART(NEW.email, '@', 1), '[^a-z0-9]', '', 'g'));
+  IF base_username = '' THEN base_username := 'user'; END IF;
   final_username := base_username;
+
+  IF final_username = ANY(ARRAY['feed','search','settings','login','signup']) THEN
+    final_username := final_username || '0';
+  END IF;
 
   WHILE EXISTS (SELECT 1 FROM profiles WHERE username = final_username) LOOP
     counter := counter + 1;
