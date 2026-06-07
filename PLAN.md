@@ -15,7 +15,7 @@
 | Phase | Status | Milestone |
 |-------|--------|-----------|
 | Phase 1: Foundation | ✅ Complete | App boots, auth works, DB schema live |
-| Phase 2: Profiles | 🚧 In Progress | Profile pages + follow/unfollow working |
+| Phase 2: Profiles | ✅ Complete | Profile pages + follow/unfollow working |
 | Phase 3: Books & Shelves | ⬜ Not Started | Add/move/display books on shelves |
 | Phase 4: Book Detail | ⬜ Not Started | Book detail page with opening animation |
 | Phase 5: Activity Feed | ⬜ Not Started | Feed with likes and comments |
@@ -1155,7 +1155,7 @@ git commit -m "feat: add profile page with shelf sections and rating component"
 - Create: `app/[username]/followers/page.tsx`
 - Create: `app/[username]/following/page.tsx`
 
-- [ ] **Step 1: Create `lib/actions/follows.ts`**
+- [x] **Step 1: Create `lib/actions/follows.ts`**
 
 ```typescript
 'use server'
@@ -1193,7 +1193,7 @@ export async function unfollowUser(followingId: string, username: string) {
 }
 ```
 
-- [ ] **Step 2: Create `components/profile/follow-button.tsx`**
+- [x] **Step 2: Create `components/profile/follow-button.tsx`**
 
 ```typescript
 'use client'
@@ -1240,7 +1240,7 @@ export function FollowButton({ followerId, followingId, initialIsFollowing, user
 }
 ```
 
-- [ ] **Step 3: Create `app/[username]/followers/page.tsx`**
+- [x] **Step 3: Create `app/[username]/followers/page.tsx`**
 
 ```typescript
 import { createClient } from '@/lib/supabase/server'
@@ -1288,7 +1288,7 @@ export default async function FollowersPage({ params }: { params: Promise<{ user
 }
 ```
 
-- [ ] **Step 4: Create `app/[username]/following/page.tsx`**
+- [x] **Step 4: Create `app/[username]/following/page.tsx`**
 
 ```typescript
 import { createClient } from '@/lib/supabase/server'
@@ -1336,7 +1336,7 @@ export default async function FollowingPage({ params }: { params: Promise<{ user
 }
 ```
 
-- [ ] **Step 5: Create `app/settings/page.tsx`**
+- [x] **Step 5: Create `app/settings/page.tsx`**
 
 ```typescript
 'use client'
@@ -1422,7 +1422,7 @@ export default function SettingsPage() {
 }
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A
