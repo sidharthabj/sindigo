@@ -17,6 +17,8 @@ Sindigo is a social reading tracker. Users maintain three shelves — Wishlist, 
 | Database + Auth | Supabase | PostgreSQL + OAuth in one platform, generous free tier |
 | DB client | Supabase TypeScript client (generated types) | Unified with Supabase auth; avoids Prisma/auth schema conflicts |
 | Book data | Google Books API | Free (1,000 req/day), rich metadata, cover art, requires API key |
+| UI components | shadcn/ui | Next.js + Tailwind native, owned components, clean defaults |
+| Animation | Framer Motion | Page transitions and book-opening interaction |
 | Styling | Tailwind CSS | Utility-first, fast iteration |
 | Hosting | Vercel | One-command deploys, preview URLs, Supabase Marketplace integration |
 
@@ -65,7 +67,7 @@ user_id      uuid (references profiles)
 book_id      uuid (references books)
 status       enum: 'wishlist' | 'reading' | 'read'
 rating       integer 1–5 (nullable, only set when status = 'read')
-review       text (nullable)
+note         text (nullable, labeled contextually by status — see UI section)
 started_at   timestamptz (nullable, set when status becomes 'reading')
 finished_at  timestamptz (nullable, set when status becomes 'read')
 created_at   timestamptz
@@ -100,9 +102,9 @@ Activity generation rules:
 - Shelf entry created with `status = 'wishlist'` → `added_wishlist`
 - Status changes to `'reading'` → `started_reading`
 - Status changes to `'read'` → `finished_book`
-- Review text is saved on a `'read'` entry → `wrote_review` (separate event from `finished_book`)
+- `note` is saved on a `'read'` entry → `wrote_review` (separate event from `finished_book`)
 
-If the user writes a review at the same time they mark a book as Read, only `finished_book` is emitted (not both). `wrote_review` is only emitted when a review is added or updated after the book was already marked Read.
+If the user writes a note at the same time they mark a book as Read, only `finished_book` is emitted (not both). `wrote_review` is only emitted when a note is added or updated after the book was already marked Read.
 
 ### `likes`
 On activity feed items.
@@ -168,7 +170,7 @@ Users have three shelves: **Wishlist**, **Currently Reading**, and **Read**.
 
 **Moving between shelves:**
 - Wishlist → Currently Reading: sets `status = 'reading'`, `started_at = now()`
-- Currently Reading → Read: sets `status = 'read'`, `finished_at = now()`, prompts for rating (required) and review (optional)
+- Currently Reading → Read: sets `status = 'read'`, `finished_at = now()`, prompts for rating (required) and note/review (optional)
 - Users can also move a book directly from Wishlist → Read
 - Moving backwards (e.g., Read → Currently Reading) is allowed; clears `finished_at` and `rating`
 
@@ -182,7 +184,7 @@ Users have three shelves: **Wishlist**, **Currently Reading**, and **Read**.
 Three sections rendered in order:
 
 1. **Currently Reading** — a horizontal row of book covers with title/author. Multiple books shown simultaneously.
-2. **Read** — a grid or list of books with rating (book icons) and review excerpt. Full review expands inline.
+2. **Read** — a grid of book covers with rating (book icons) below each. Clicking opens the book detail page with the full review.
 3. **Wishlist** — a list of books the user wants to read, no ratings.
 
 Header shows: avatar, display name, username, bio, follower count, following count, and a Follow/Unfollow button (visible to authenticated users who are not the profile owner).
@@ -193,7 +195,7 @@ Own profile shows an Edit Profile link instead of Follow/Unfollow.
 
 - Reverse-chronological stream of events from followed users
 - Activity card shows: avatar + username, event description, book cover + title, timestamp
-- For `wrote_review` events: shows rating (book icons) + review excerpt with "read more" expansion
+- For `wrote_review` events: shows rating (book icons) + note excerpt with a link to the book detail page
 - **Likes:** toggle button on each card; shows like count
 - **Comments:** expandable inline thread below each card; text input to add a comment
 - **Pagination:** "Load more" button at the bottom — no infinite scroll
@@ -218,6 +220,49 @@ Handled by Supabase Auth:
 - Email + password
 - Google OAuth
 - On first sign-in, a database trigger creates a `profiles` row with a default username derived from the email (user can update in `/settings`)
+
+---
+
+## UI Design
+
+### Component Library
+
+**shadcn/ui** — components are copied directly into the project (not imported from a package), so every component is fully ownable and customizable. Built on Radix UI primitives for accessibility. Used for: cards, dialogs/modals, inputs, buttons, avatars, badges, dropdowns.
+
+**Framer Motion** — powers all animations, specifically the book-opening transition.
+
+### Shelf Layout
+
+Each shelf displays books as a **grid of covers** (the cover image is the primary visual element). Covers are uniformly sized with the title and author shown on hover or below in a small caption. The "Currently Reading" shelf at the top of the profile is displayed as a horizontal row rather than a grid, to give it visual prominence.
+
+### Book Detail: The Opening Animation
+
+Clicking any book cover triggers a signature animation:
+
+1. **Lift** — the cover card scales up slightly and a shadow appears beneath it (Framer Motion `whileTap`/`whileHover`)
+2. **Open** — a 3D page-turn effect plays using CSS `perspective` and `rotateY` transforms: the right side of the cover folds back along the spine (left edge), as if opening a real book
+3. **Reveal** — the animation transitions into the book detail page, which fades in underneath the opening cover
+
+This is implemented as a Framer Motion `layoutId` shared animation between the cover card and the detail page header, combined with a CSS 3D transform for the fold effect.
+
+### Book Detail Page
+
+A full page (not a modal) with a clean, book-interior aesthetic — light cream or white background, generous whitespace, serif-adjacent typography:
+
+- **Left column:** book cover (large), title, author, published year
+- **Right column:** shelf status badge, rating (book icons, Read only), the note field
+
+The note field is labeled contextually:
+
+| Shelf status | Label |
+|---|---|
+| Wishlist | "Why I want to read this" |
+| Currently Reading | "My thoughts so far" |
+| Read | "My review" |
+
+The note is editable inline for the profile owner. Visitors see it read-only.
+
+A "Move to shelf" button allows the owner to change the book's status from this page.
 
 ---
 
