@@ -85,7 +85,7 @@ export default async function BookDetailPage({
       <BookOpeningAnimation bookId={book.id}>
         <div className="flex gap-8 flex-col sm:flex-row">
           {/* Cover */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 flex flex-col items-center gap-3">
             <div className="relative w-40 aspect-[2/3] rounded-lg overflow-hidden shadow-xl">
               {book.cover_url ? (
                 <Image src={book.cover_url} alt={book.title} fill className="object-cover" />
@@ -95,6 +95,9 @@ export default async function BookDetailPage({
                 </div>
               )}
             </div>
+            {user && !isOwner && (
+              <WishlistButton bookId={book.id} initialIsOnShelf={viewerAlreadyHasBook} />
+            )}
           </div>
 
           {/* Info */}
@@ -108,10 +111,6 @@ export default async function BookDetailPage({
             </div>
 
             <Badge variant="secondary">{STATUS_LABELS[typedEntry.status]}</Badge>
-
-            {user && !isOwner && (
-              <WishlistButton bookId={book.id} initialIsOnShelf={viewerAlreadyHasBook} />
-            )}
 
             {typedEntry.status === 'read' && (
               isOwner
