@@ -1,13 +1,7 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
-export default async function HomePage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (user) redirect('/feed')
-
+export default function HomePage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-24 text-center">
       <h1 className="text-4xl font-bold tracking-tight mb-4">Sindigo</h1>

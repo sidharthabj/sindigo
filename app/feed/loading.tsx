@@ -12,7 +12,9 @@ export default function FeedLoading() {
               <Skeleton className="h-3 w-20" />
             </div>
           </div>
-          <Skeleton className="h-16 w-full ml-12" />
+          <div className="pl-12">
+            <Skeleton className="h-16 w-full" />
+          </div>
         </div>
       ))}
     </div>
