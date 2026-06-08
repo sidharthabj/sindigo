@@ -16,9 +16,9 @@
 |-------|--------|-----------|
 | Phase 1: Foundation | ✅ Complete | App boots, auth works, DB schema live |
 | Phase 2: Profiles | ✅ Complete | Profile pages + follow/unfollow working |
-| Phase 3: Books & Shelves | ⬜ Not Started | Add/move/display books on shelves |
-| Phase 4: Book Detail | ⬜ Not Started | Book detail page with opening animation |
-| Phase 5: Activity Feed | ⬜ Not Started | Feed with likes and comments |
+| Phase 3: Books & Shelves | ✅ Complete | Add/move/display books on shelves |
+| Phase 4: Book Detail | ✅ Complete | Book detail page with opening animation |
+| Phase 5: Activity Feed | ✅ Complete | Feed with likes and comments |
 | Phase 6: Polish | ⬜ Not Started | Landing page, empty states, error states |
 
 **Update status column as work progresses:** ⬜ Not Started → 🚧 In Progress → ✅ Complete
@@ -1444,7 +1444,7 @@ Update the Project Status table at the top of this file to ✅ Complete before s
 - Create: `lib/google-books.ts`
 - Create: `lib/google-books.test.ts`
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 Create `lib/google-books.test.ts`:
 
@@ -1492,7 +1492,7 @@ describe('parseGoogleBooksItem', () => {
 })
 ```
 
-- [ ] **Step 2: Run test to confirm it fails**
+- [x] **Step 2: Run test to confirm it fails**
 
 ```bash
 npm run test:run lib/google-books.test.ts
@@ -1500,7 +1500,7 @@ npm run test:run lib/google-books.test.ts
 
 Expected: FAIL
 
-- [ ] **Step 3: Create `lib/google-books.ts`**
+- [x] **Step 3: Create `lib/google-books.ts`**
 
 ```typescript
 export interface GoogleBook {
@@ -1549,7 +1549,7 @@ export async function getBookById(googleBooksId: string): Promise<GoogleBook | n
 }
 ```
 
-- [ ] **Step 4: Run test to confirm it passes**
+- [x] **Step 4: Run test to confirm it passes**
 
 ```bash
 npm run test:run lib/google-books.test.ts
@@ -1557,7 +1557,7 @@ npm run test:run lib/google-books.test.ts
 
 Expected: 5 tests PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/google-books.ts lib/google-books.test.ts
@@ -1571,7 +1571,7 @@ git commit -m "feat: add Google Books API wrapper with unit tests"
 **Files:**
 - Create: `lib/actions/books.ts`
 
-- [ ] **Step 1: Create `lib/actions/books.ts`**
+- [x] **Step 1: Create `lib/actions/books.ts`**
 
 ```typescript
 'use server'
@@ -1771,7 +1771,7 @@ export async function updateNote(shelfEntryId: string, note: string) {
 }
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add lib/actions/books.ts
@@ -1786,7 +1786,7 @@ git commit -m "feat: add book server actions (add, move, update note)"
 - Create: `components/books/book-search-modal.tsx`
 - Create: `app/search/page.tsx`
 
-- [ ] **Step 1: Create `components/books/book-search-modal.tsx`**
+- [x] **Step 1: Create `components/books/book-search-modal.tsx`**
 
 ```typescript
 'use client'
@@ -1978,7 +1978,7 @@ export function BookSearchModal({ trigger, defaultStatus = 'wishlist' }: BookSea
 }
 ```
 
-- [ ] **Step 2: Create `app/search/page.tsx`**
+- [x] **Step 2: Create `app/search/page.tsx`**
 
 ```typescript
 import { BookSearchModal } from '@/components/books/book-search-modal'
@@ -1996,7 +1996,7 @@ export default function SearchPage() {
 }
 ```
 
-- [ ] **Step 3: Add "Add book" button to navbar for logged-in users**
+- [x] **Step 3: Add "Add book" button to navbar for logged-in users**
 
 In `components/layout/navbar.tsx`, the Add Book button already links to `/search`. The `BookSearchModal` can also be triggered inline from the profile page — add an "Add book" button to the profile page for the owner:
 
@@ -2015,7 +2015,7 @@ Also add the import at the top of `app/[username]/page.tsx`:
 import { BookSearchModal } from '@/components/books/book-search-modal'
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add -A
@@ -2037,7 +2037,7 @@ Update the Project Status table at the top of this file to ✅ Complete before s
 - Create: `app/[username]/books/[bookId]/page.tsx`
 - Create: `components/books/book-opening-animation.tsx`
 
-- [ ] **Step 1: Create `components/books/book-opening-animation.tsx`**
+- [x] **Step 1: Create `components/books/book-opening-animation.tsx`**
 
 ```typescript
 'use client'
@@ -2113,7 +2113,7 @@ export function BookCard({ entry, username }: BookCardProps) {
 }
 ```
 
-- [ ] **Step 2: Create `app/[username]/books/[bookId]/page.tsx`**
+- [x] **Step 2: Create `app/[username]/books/[bookId]/page.tsx`**
 
 ```typescript
 import { createClient } from '@/lib/supabase/server'
@@ -2234,7 +2234,7 @@ export default async function BookDetailPage({
 }
 ```
 
-- [ ] **Step 3: Create `components/books/note-editor.tsx`**
+- [x] **Step 3: Create `components/books/note-editor.tsx`**
 
 ```typescript
 'use client'
@@ -2311,7 +2311,7 @@ export function NoteEditor({ shelfEntryId, initialNote, isOwner, status }: NoteE
 }
 ```
 
-- [ ] **Step 4: Create `components/books/move-shelf-button.tsx`**
+- [x] **Step 4: Create `components/books/move-shelf-button.tsx`**
 
 ```typescript
 'use client'
@@ -2388,7 +2388,7 @@ export function MoveShelfButton({ shelfEntryId, currentStatus, currentRating, us
 }
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A
@@ -2415,7 +2415,7 @@ Update the Project Status table at the top of this file to ✅ Complete before s
 - Create: `components/feed/activity-feed.tsx`
 - Create: `app/feed/page.tsx`
 
-- [ ] **Step 1: Create `lib/actions/likes.ts`**
+- [x] **Step 1: Create `lib/actions/likes.ts`**
 
 ```typescript
 'use server'
@@ -2446,7 +2446,7 @@ export async function toggleLike(activityId: string) {
 }
 ```
 
-- [ ] **Step 2: Create `lib/actions/comments.ts`**
+- [x] **Step 2: Create `lib/actions/comments.ts`**
 
 ```typescript
 'use server'
@@ -2484,7 +2484,7 @@ export async function deleteComment(commentId: string) {
 }
 ```
 
-- [ ] **Step 3: Create `components/feed/like-button.tsx`**
+- [x] **Step 3: Create `components/feed/like-button.tsx`**
 
 ```typescript
 'use client'
@@ -2529,7 +2529,7 @@ export function LikeButton({ activityId, initialCount, initialLiked }: LikeButto
 }
 ```
 
-- [ ] **Step 4: Create `components/feed/comment-thread.tsx`**
+- [x] **Step 4: Create `components/feed/comment-thread.tsx`**
 
 ```typescript
 'use client'
@@ -2621,7 +2621,7 @@ export function CommentThread({ activityId, comments, currentUserId }: CommentTh
 }
 ```
 
-- [ ] **Step 5: Create `components/feed/activity-card.tsx`**
+- [x] **Step 5: Create `components/feed/activity-card.tsx`**
 
 ```typescript
 import Image from 'next/image'
@@ -2715,7 +2715,7 @@ export function ActivityCard({ activity, currentUserId }: ActivityCardProps) {
 }
 ```
 
-- [ ] **Step 6: Create `app/feed/page.tsx`**
+- [x] **Step 6: Create `app/feed/page.tsx`**
 
 ```typescript
 import { createClient } from '@/lib/supabase/server'
@@ -2815,7 +2815,7 @@ export default async function FeedPage({
 }
 ```
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add -A
