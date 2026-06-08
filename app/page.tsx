@@ -1,21 +1,24 @@
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { buttonVariants } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) redirect('/feed')
+
   return (
-    <div className="flex flex-col items-center justify-center py-32 text-center px-4">
+    <div className="max-w-2xl mx-auto px-4 py-24 text-center">
       <h1 className="text-4xl font-bold tracking-tight mb-4">Sindigo</h1>
-      <p className="text-lg text-muted-foreground max-w-md mb-8">
-        Track what you&apos;re reading, share reviews with friends, and discover your next book.
+      <p className="text-xl text-muted-foreground mb-8">
+        Track what you read. Share what you love.
+        <br />
+        Your personal bookshelf, made social.
       </p>
-      <div className="flex gap-3">
-        <Link href="/signup" className={cn(buttonVariants({ variant: 'default' }))}>
-          Get started
-        </Link>
-        <Link href="/login" className={cn(buttonVariants({ variant: 'outline' }))}>
-          Log in
-        </Link>
+      <div className="flex gap-3 justify-center">
+        <Button asChild size="lg"><Link href="/signup">Get started</Link></Button>
+        <Button asChild size="lg" variant="outline"><Link href="/login">Log in</Link></Button>
       </div>
     </div>
   )
