@@ -209,16 +209,14 @@ export async function updateNote(shelfEntryId: string, note: string) {
   if (error) throw error
 
   if (existing.status === 'read' && note.trim()) {
-    // Per spec: only emit wrote_review if neither finished_book nor wrote_review
-    // has already been emitted for this entry (finished_book supersedes wrote_review)
-    const { data: priorActivity } = await supabase
+    const { data: priorReview } = await supabase
       .from('activities')
       .select('id')
       .eq('shelf_entry_id', shelfEntryId)
-      .in('activity_type', ['finished_book', 'wrote_review'])
+      .eq('activity_type', 'wrote_review')
       .maybeSingle()
 
-    if (!priorActivity) {
+    if (!priorReview) {
       await emitActivity(supabase, user.id, 'wrote_review', shelfEntryId)
     }
   }
