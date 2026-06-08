@@ -10,7 +10,7 @@ export default async function HomePage() {
   if (user) redirect('/feed')
 
   return (
-    <div className="max-w-2xl mx-auto px-4 text-center flex flex-col items-center justify-center min-h-[calc(100vh-4rem)]">
+    <div className="max-w-2xl mx-auto px-4 py-24 text-center">
       <h1 className="text-4xl font-bold tracking-tight mb-4">Sindigo</h1>
       <p className="text-xl text-muted-foreground mb-8">
         Track what you read. Share what you love.
