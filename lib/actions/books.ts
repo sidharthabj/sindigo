@@ -230,6 +230,31 @@ export async function updateNote(shelfEntryId: string, note: string) {
   }
 }
 
+export async function addBookToWishlist(bookId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { data: entry, error } = await supabase
+    .from('shelf_entries')
+    .insert({ user_id: user.id, book_id: bookId, status: 'wishlist' as ShelfStatus })
+    .select()
+    .single()
+
+  if (error) {
+    if (error.code === '23505') throw new Error('This book is already on your shelf')
+    throw error
+  }
+
+  await emitActivity(supabase, user.id, 'added_wishlist', entry.id)
+
+  const { data: profile } = await supabase
+    .from('profiles').select('username').eq('id', user.id).single()
+  if (profile) revalidatePath(`/${profile.username}`)
+
+  return entry
+}
+
 export async function updateRating(shelfEntryId: string, rating: number) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
