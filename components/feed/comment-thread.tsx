@@ -39,18 +39,18 @@ export function CommentThread({ activityId, comments, currentUserId }: CommentTh
   }
 
   return (
-    <div>
-      <button
-        className="text-xs text-muted-foreground hover:underline"
-        onClick={() => setExpanded(e => !e)}
-      >
-        {comments.length > 0
-          ? `${expanded ? 'Hide' : 'Show'} ${comments.length} comment${comments.length === 1 ? '' : 's'}`
-          : 'Add a comment'}
-      </button>
+    <div className="space-y-2">
+      {comments.length > 0 && (
+        <button
+          className="text-xs text-muted-foreground hover:underline cursor-pointer"
+          onClick={() => setExpanded(e => !e)}
+        >
+          {expanded ? 'Hide' : 'Show'} {comments.length} comment{comments.length === 1 ? '' : 's'}
+        </button>
+      )}
 
       {expanded && (
-        <div className="mt-3 space-y-3">
+        <div className="space-y-2">
           {comments.map(c => (
             <div key={c.id} className="flex gap-2 items-start">
               <Avatar className="w-6 h-6">
@@ -74,19 +74,22 @@ export function CommentThread({ activityId, comments, currentUserId }: CommentTh
               )}
             </div>
           ))}
-
-          {currentUserId && (
-            <form onSubmit={handleAdd} className="flex gap-2">
-              <Input
-                value={text}
-                onChange={e => setText(e.target.value)}
-                placeholder="Write a comment…"
-                className="h-8 text-sm"
-              />
-              <Button type="submit" size="sm" disabled={isPending || !text.trim()}>Post</Button>
-            </form>
-          )}
         </div>
+      )}
+
+      {currentUserId && (
+        <form onSubmit={handleAdd} className="flex gap-2">
+          <Input
+            value={text}
+            onChange={e => setText(e.target.value)}
+            placeholder="Add a comment…"
+            className="h-8 text-sm"
+            disabled={isPending}
+          />
+          {text.trim() && (
+            <Button type="submit" size="sm" disabled={isPending}>Post</Button>
+          )}
+        </form>
       )}
     </div>
   )
