@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { getBookById } from '@/lib/google-books'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/types/database'
@@ -253,6 +254,35 @@ export async function addBookToWishlist(bookId: string) {
   if (profile) revalidatePath(`/${profile.username}`)
 
   return entry
+}
+
+export async function removeFromShelf(shelfEntryId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { data: existing, error: fetchError } = await supabase
+    .from('shelf_entries')
+    .select('id')
+    .eq('id', shelfEntryId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (fetchError || !existing) throw new Error('Shelf entry not found')
+
+  const { error } = await supabase
+    .from('shelf_entries')
+    .delete()
+    .eq('id', shelfEntryId)
+    .eq('user_id', user.id)
+
+  if (error) throw error
+
+  const { data: profile } = await supabase
+    .from('profiles').select('username').eq('id', user.id).single()
+
+  if (profile) revalidatePath(`/${profile.username}`)
+  redirect(`/${profile?.username ?? ''}`)
 }
 
 export async function updateRating(shelfEntryId: string, rating: number) {

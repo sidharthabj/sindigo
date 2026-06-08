@@ -30,7 +30,8 @@ export function LikeButton({ activityId, initialCount, initialLiked }: LikeButto
       disabled={isPending}
       className={cn(
         'flex flex-col items-center justify-center px-2.5 pt-1.5 pb-1 rounded-lg border transition-all',
-        'w-10 shrink-0 select-none',
+        'w-10 shrink-0 select-none cursor-pointer',
+        'hover:scale-105 active:scale-95',
         liked
           ? 'border-rose-400 text-rose-500 bg-rose-50 dark:bg-rose-950/30'
           : 'border-border text-muted-foreground hover:border-rose-300 hover:text-rose-400 hover:bg-rose-50/50 dark:hover:bg-rose-950/20',
