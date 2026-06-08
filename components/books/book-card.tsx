@@ -4,19 +4,15 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Rating } from './rating'
-import { WishlistButton } from './wishlist-button'
 import type { ShelfEntryWithBook } from '@/lib/types'
 
 interface BookCardProps {
   entry: ShelfEntryWithBook
   username: string
-  isOwner?: boolean
-  isOnViewerShelf?: boolean
 }
 
-export function BookCard({ entry, username, isOwner, isOnViewerShelf }: BookCardProps) {
+export function BookCard({ entry, username }: BookCardProps) {
   const { book, rating } = entry
-  const showWishlistButton = !isOwner && isOnViewerShelf !== undefined
 
   return (
     <Link href={`/${username}/books/${book.id}`} className="group flex flex-col gap-2">
@@ -38,9 +34,6 @@ export function BookCard({ entry, username, isOwner, isOnViewerShelf }: BookCard
           <div className="flex h-full items-center justify-center text-xs text-muted-foreground px-2 text-center">
             {book.title}
           </div>
-        )}
-        {showWishlistButton && (
-          <WishlistButton bookId={book.id} initialIsOnShelf={isOnViewerShelf!} />
         )}
       </motion.div>
       <div>

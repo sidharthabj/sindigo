@@ -6,11 +6,9 @@ interface ShelfSectionProps {
   entries: ShelfEntryWithBook[]
   username: string
   horizontal?: boolean
-  isOwner?: boolean
-  viewerBookIds?: Set<string>
 }
 
-export function ShelfSection({ title, entries, username, horizontal, isOwner, viewerBookIds }: ShelfSectionProps) {
+export function ShelfSection({ title, entries, username, horizontal }: ShelfSectionProps) {
   if (entries.length === 0) return null
 
   return (
@@ -23,12 +21,7 @@ export function ShelfSection({ title, entries, username, horizontal, isOwner, vi
       }>
         {entries.map(entry => (
           <div key={entry.id} className={horizontal ? 'flex-shrink-0 w-28' : ''}>
-            <BookCard
-              entry={entry}
-              username={username}
-              isOwner={isOwner}
-              isOnViewerShelf={viewerBookIds ? viewerBookIds.has(entry.book.id) : undefined}
-            />
+            <BookCard entry={entry} username={username} />
           </div>
         ))}
       </div>

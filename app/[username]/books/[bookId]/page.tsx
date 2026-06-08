@@ -6,6 +6,7 @@ import { Rating } from '@/components/books/rating'
 import { RatingEditor } from '@/components/books/rating-editor'
 import { NoteEditor } from '@/components/books/note-editor'
 import { MoveShelfButton } from '@/components/books/move-shelf-button'
+import { WishlistButton } from '@/components/books/wishlist-button'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import type { ShelfEntryWithBook } from '@/lib/types'
@@ -64,6 +65,18 @@ export default async function BookDetailPage({
   const { book } = typedEntry
   const isOwner = user?.id === profile.id
 
+  const viewerEntry = user && !isOwner
+    ? await supabase
+        .from('shelf_entries')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('book_id', bookId)
+        .maybeSingle()
+        .then(r => r.data)
+    : null
+
+  const viewerAlreadyHasBook = !!viewerEntry
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <Link href={`/${username}`} className="text-sm text-muted-foreground hover:underline mb-6 block">
@@ -95,6 +108,10 @@ export default async function BookDetailPage({
             </div>
 
             <Badge variant="secondary">{STATUS_LABELS[typedEntry.status]}</Badge>
+
+            {user && !isOwner && (
+              <WishlistButton bookId={book.id} initialIsOnShelf={viewerAlreadyHasBook} />
+            )}
 
             {typedEntry.status === 'read' && (
               isOwner
