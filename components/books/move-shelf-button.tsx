@@ -63,9 +63,10 @@ export function MoveShelfButton({ shelfEntryId, currentStatus, currentRating, us
           <DialogTitle>Update Status</DialogTitle>
         </DialogHeader>
         {error && <p className="text-sm text-red-500">{error}</p>}
-        <div className="space-y-3">
-          {OPTIONS.filter(o => o.status !== currentStatus).map(option => (
+        <div className="flex flex-col">
+          {OPTIONS.filter(o => o.status !== currentStatus).map((option, idx) => (
             <div key={option.status}>
+              {idx > 0 && <div className="border-t my-3" />}
               {option.status === 'read' && (
                 <div className="mb-2">
                   <p className="text-sm text-muted-foreground mb-1">Rating</p>
@@ -84,7 +85,8 @@ export function MoveShelfButton({ shelfEntryId, currentStatus, currentRating, us
           ))}
 
           {currentStatus !== 'read' && (
-            <div className="pt-1 border-t">
+            <>
+              <div className="border-t my-3" />
               {confirmRemove ? (
                 <div className="flex gap-2">
                   <Button
@@ -105,15 +107,16 @@ export function MoveShelfButton({ shelfEntryId, currentStatus, currentRating, us
                   </Button>
                 </div>
               ) : (
-                <button
-                  type="button"
+                <Button
+                  className="w-full"
+                  variant="outline"
                   onClick={() => setConfirmRemove(true)}
-                  className="text-sm text-muted-foreground hover:text-destructive hover:underline cursor-pointer w-full text-left"
+                  disabled={isPending}
                 >
                   Remove from shelf
-                </button>
+                </Button>
               )}
-            </div>
+            </>
           )}
         </div>
       </DialogContent>
