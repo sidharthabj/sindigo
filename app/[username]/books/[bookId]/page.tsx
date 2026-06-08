@@ -5,7 +5,7 @@ import { BookOpeningAnimation } from '@/components/books/book-opening-animation'
 import { Rating } from '@/components/books/rating'
 import { RatingEditor } from '@/components/books/rating-editor'
 import { NoteEditor } from '@/components/books/note-editor'
-import { MoveShelfButton } from '@/components/books/move-shelf-button'
+import { ShelfSelector } from '@/components/books/shelf-selector'
 import { WishlistButton } from '@/components/books/wishlist-button'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
@@ -131,11 +131,10 @@ export default async function BookDetailPage({
             </div>
 
             {isOwner && (
-              <MoveShelfButton
+              <ShelfSelector
                 shelfEntryId={typedEntry.id}
                 currentStatus={typedEntry.status}
                 currentRating={typedEntry.rating ?? undefined}
-                username={username}
               />
             )}
           </div>
