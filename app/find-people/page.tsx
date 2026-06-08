@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { FollowButton } from '@/components/profile/follow-button'
 import { searchUsersAction, type UserSearchResult } from '@/lib/actions/search'
 import Link from 'next/link'
@@ -57,14 +58,22 @@ export default function FindPeoplePage() {
       <ul className="space-y-3">
         {results.map(user => (
           <li key={user.id} className="flex items-center justify-between gap-4 py-3 border-b last:border-0">
-            <div className="min-w-0">
-              <Link href={`/${user.username}`} className="font-medium hover:underline truncate block">
-                {user.display_name}
+            <div className="flex items-center gap-3 min-w-0">
+              <Link href={`/${user.username}`} className="shrink-0">
+                <Avatar className="w-10 h-10">
+                  <AvatarImage src={user.avatar_url ?? undefined} />
+                  <AvatarFallback>{user.display_name[0]}</AvatarFallback>
+                </Avatar>
               </Link>
-              <p className="text-sm text-muted-foreground">@{user.username}</p>
-              {user.bio && (
-                <p className="text-sm text-muted-foreground mt-0.5 truncate">{user.bio}</p>
-              )}
+              <div className="min-w-0">
+                <Link href={`/${user.username}`} className="font-medium hover:underline truncate block">
+                  {user.display_name}
+                </Link>
+                <p className="text-sm text-muted-foreground">@{user.username}</p>
+                {user.bio && (
+                  <p className="text-sm text-muted-foreground mt-0.5 truncate">{user.bio}</p>
+                )}
+              </div>
             </div>
             <FollowButton
               followingId={user.id}

@@ -15,6 +15,7 @@ export type UserSearchResult = {
   id: string
   username: string
   display_name: string
+  avatar_url: string | null
   bio: string | null
   is_following: boolean
 }
@@ -34,9 +35,9 @@ export async function searchUsersAction(query: string): Promise<UserSearchResult
 
   const pattern = `%${sanitized}%`
   const [usernameRes, displayNameRes] = await Promise.all([
-    supabase.from('profiles').select('id, username, display_name, bio')
+    supabase.from('profiles').select('id, username, display_name, avatar_url, bio')
       .ilike('username', pattern).neq('id', user.id).limit(20),
-    supabase.from('profiles').select('id, username, display_name, bio')
+    supabase.from('profiles').select('id, username, display_name, avatar_url, bio')
       .ilike('display_name', pattern).neq('id', user.id).limit(20),
   ])
 
