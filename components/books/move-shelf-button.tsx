@@ -6,7 +6,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger
 } from '@/components/ui/dialog'
 import { Rating } from './rating'
-import { moveToShelf } from '@/lib/actions/books'
+import { moveToShelf, removeFromShelf } from '@/lib/actions/books'
 import { useRouter } from 'next/navigation'
 import type { ShelfStatus } from '@/lib/types'
 
@@ -29,6 +29,7 @@ export function MoveShelfButton({ shelfEntryId, currentStatus, currentRating, us
   const [rating, setRating] = useState(currentRating ?? 0)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [confirmRemove, setConfirmRemove] = useState(false)
 
   function handleMove(status: ShelfStatus) {
     setError(null)
@@ -37,6 +38,17 @@ export function MoveShelfButton({ shelfEntryId, currentStatus, currentRating, us
         await moveToShelf(shelfEntryId, status, status === 'read' ? rating : undefined)
         setOpen(false)
         router.refresh()
+      } catch (err: any) {
+        setError(err.message)
+      }
+    })
+  }
+
+  function handleRemove() {
+    setError(null)
+    startTransition(async () => {
+      try {
+        await removeFromShelf(shelfEntryId)
       } catch (err: any) {
         setError(err.message)
       }
@@ -70,6 +82,39 @@ export function MoveShelfButton({ shelfEntryId, currentStatus, currentRating, us
               </Button>
             </div>
           ))}
+
+          {currentStatus !== 'read' && (
+            <div className="pt-1 border-t">
+              {confirmRemove ? (
+                <div className="flex gap-2">
+                  <Button
+                    className="flex-1"
+                    variant="destructive"
+                    onClick={handleRemove}
+                    disabled={isPending}
+                  >
+                    {isPending ? 'Removing…' : 'Yes, remove'}
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    variant="outline"
+                    onClick={() => setConfirmRemove(false)}
+                    disabled={isPending}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setConfirmRemove(true)}
+                  className="text-sm text-muted-foreground hover:text-destructive hover:underline cursor-pointer w-full text-left"
+                >
+                  Remove from shelf
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
