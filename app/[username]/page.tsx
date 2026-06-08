@@ -51,7 +51,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         isOwner={user?.id === profile.id}
         currentUserId={user?.id ?? null}
       />
-      <div className="space-y-10 pb-16">
+      <div className="space-y-6 pb-10">
         <ShelfSection title="Currently Reading" entries={reading} username={username} horizontal />
         <ShelfSection title="Read" entries={read} username={username} />
         <ShelfSection title="Wishlist" entries={wishlist} username={username} />

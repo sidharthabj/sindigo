@@ -19,7 +19,7 @@
 | Phase 3: Books & Shelves | ✅ Complete | Add/move/display books on shelves |
 | Phase 4: Book Detail | ✅ Complete | Book detail page with opening animation |
 | Phase 5: Activity Feed | ✅ Complete | Feed with likes and comments |
-| Phase 6: Polish | ⬜ Not Started | Landing page, empty states, error states |
+| Phase 6: Polish | ✅ Complete | Landing page, empty states, error states |
 
 **Update status column as work progresses:** ⬜ Not Started → 🚧 In Progress → ✅ Complete
 
@@ -2836,7 +2836,7 @@ Update the Project Status table at the top of this file to ✅ Complete before s
 **Files:**
 - Create: `app/page.tsx`
 
-- [ ] **Step 1: Create `app/page.tsx`**
+- [x] **Step 1: Create `app/page.tsx`**
 
 ```typescript
 import { createClient } from '@/lib/supabase/server'
@@ -2866,7 +2866,7 @@ export default async function HomePage() {
 }
 ```
 
-- [ ] **Step 2: Add `not-found.tsx` for unknown profiles**
+- [x] **Step 2: Add `not-found.tsx` for unknown profiles**
 
 Create `app/[username]/not-found.tsx`:
 
@@ -2887,7 +2887,7 @@ export default function ProfileNotFound() {
 }
 ```
 
-- [ ] **Step 3: Add loading skeletons**
+- [x] **Step 3: Add loading skeletons**
 
 Create `app/[username]/loading.tsx`:
 
@@ -2946,7 +2946,7 @@ export default function FeedLoading() {
 }
 ```
 
-- [ ] **Step 4: Add `next.config` to allow Google Books image domain**
+- [x] **Step 4: Add `next.config` to allow Google Books image domain**
 
 Update `next.config.ts`:
 
@@ -2968,7 +2968,7 @@ const nextConfig: NextConfig = {
 export default nextConfig
 ```
 
-- [ ] **Step 5: Run full test suite**
+- [x] **Step 5: Run full test suite**
 
 ```bash
 npm run test:run
@@ -2976,7 +2976,7 @@ npm run test:run
 
 Expected: All tests pass.
 
-- [ ] **Step 6: Final commit**
+- [x] **Step 6: Final commit**
 
 ```bash
 git add -A

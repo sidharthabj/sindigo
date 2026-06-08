@@ -19,7 +19,8 @@ export type CommentWithProfile = Comment & {
 
 export type ActivityWithDetails = Activity & {
   profile: Pick<Profile, 'username' | 'display_name' | 'avatar_url'>
-  shelf_entry: ShelfEntryWithBook
+  shelf_entry: ShelfEntryWithBook | null
+  followed_user: Pick<Profile, 'username' | 'display_name' | 'avatar_url'> | null
   like_count: number
   user_has_liked: boolean
   comments: CommentWithProfile[]

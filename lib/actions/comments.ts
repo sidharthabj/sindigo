@@ -3,15 +3,19 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
+const MAX_COMMENT_LENGTH = 1000
+
 export async function addComment(activityId: string, content: string) {
-  if (!content.trim()) throw new Error('Comment cannot be empty')
+  const trimmed = content.trim()
+  if (!trimmed) throw new Error('Comment cannot be empty')
+  if (trimmed.length > MAX_COMMENT_LENGTH) throw new Error(`Comment must be ${MAX_COMMENT_LENGTH} characters or fewer`)
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
   const { error } = await supabase
     .from('comments')
-    .insert({ user_id: user.id, activity_id: activityId, content: content.trim() })
+    .insert({ user_id: user.id, activity_id: activityId, content: trimmed })
 
   if (error) throw error
   revalidatePath('/feed')

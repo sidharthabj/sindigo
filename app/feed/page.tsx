@@ -25,17 +25,7 @@ export default async function FeedPage({
 
   if (followsError) throw followsError
 
-  const followingIds = (followRows ?? []).map(r => r.following_id)
-
-  if (followingIds.length === 0) {
-    return (
-      <div className="max-w-2xl mx-auto px-4 py-16 text-center">
-        <p className="text-muted-foreground mb-4">
-          You're not following anyone yet. Visit a profile to follow people.
-        </p>
-      </div>
-    )
-  }
+  const followingIds = [user.id, ...(followRows ?? []).map(r => r.following_id)]
 
   const from = (page - 1) * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
@@ -49,6 +39,7 @@ export default async function FeedPage({
         *,
         book:books(*)
       ),
+      followed_user:profiles!followed_user_id(username, display_name, avatar_url),
       likes(id, user_id),
       comments(
         *,
@@ -61,6 +52,8 @@ export default async function FeedPage({
 
   const activities: ActivityWithDetails[] = (rawActivities ?? []).map(a => ({
     ...a,
+    shelf_entry: a.shelf_entry ?? null,
+    followed_user: a.followed_user ?? null,
     like_count: a.likes.length,
     user_has_liked: a.likes.some((l: any) => l.user_id === user.id),
     comments: a.comments,
