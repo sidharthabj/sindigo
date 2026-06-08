@@ -52,14 +52,14 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="max-w-sm mx-auto mt-16 px-4">
-      <h1 className="text-2xl font-bold mb-6">Create account</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
+    <div className="max-w-sm mx-auto mt-20 px-4">
+      <h1 className="text-2xl font-bold mb-8">Create account</h1>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-1.5">
           <Label htmlFor="email">Email</Label>
           <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
         </div>
-        <div>
+        <div className="space-y-1.5">
           <Label htmlFor="password">Password</Label>
           <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
         </div>
@@ -68,12 +68,19 @@ export default function SignupPage() {
           {loading ? 'Creating account…' : 'Sign up'}
         </Button>
       </form>
-      <div className="my-4 text-center text-sm text-muted-foreground">or</div>
+      <div className="my-6 flex items-center gap-3">
+        <div className="flex-1 h-px bg-border" />
+        <span className="text-sm text-muted-foreground">or</span>
+        <div className="flex-1 h-px bg-border" />
+      </div>
       <Button variant="outline" className="w-full" onClick={handleGoogle}>
         Continue with Google
       </Button>
-      <p className="mt-4 text-sm text-center">
-        Have an account? <Link href="/login" className="underline">Log in</Link>
+      <p className="mt-6 text-sm text-center text-muted-foreground">
+        Have an account?{' '}
+        <Link href="/login" className="text-foreground underline underline-offset-4 hover:text-foreground/80">
+          Log in
+        </Link>
       </p>
     </div>
   )
