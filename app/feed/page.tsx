@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { ActivityCard } from '@/components/feed/activity-card'
+import { FeedPagination } from '@/components/ui/feed-pagination'
 import type { ActivityWithDetails } from '@/lib/types'
 
 const PAGE_SIZE = 20
@@ -29,6 +29,14 @@ export default async function FeedPage({
 
   const from = (page - 1) * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
+
+  const { count: totalCount } = await supabase
+    .from('activities')
+    .select('id', { count: 'exact', head: true })
+    .in('user_id', followingIds)
+
+  const totalPages = Math.max(1, Math.ceil((totalCount ?? 0) / PAGE_SIZE))
+  const safePage = Math.min(page, totalPages)
 
   const { data: rawActivities } = await supabase
     .from('activities')
@@ -73,17 +81,7 @@ export default async function FeedPage({
               currentUserId={user.id}
             />
           ))}
-          {activities.length === PAGE_SIZE && (
-            <div className="text-center pt-4">
-              <Link
-                href={`/feed?page=${page + 1}`}
-                className="text-sm text-muted-foreground hover:underline"
-                scroll={false}
-              >
-                Load more
-              </Link>
-            </div>
-          )}
+          <FeedPagination currentPage={safePage} totalPages={totalPages} />
         </div>
       )}
     </div>
