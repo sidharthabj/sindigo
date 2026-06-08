@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,6 +16,7 @@ interface CommentThreadProps {
 }
 
 export function CommentThread({ activityId, comments, currentUserId }: CommentThreadProps) {
+  const router = useRouter()
   const [expanded, setExpanded] = useState(false)
   const [text, setText] = useState('')
   const [isPending, startTransition] = useTransition()
@@ -25,11 +27,15 @@ export function CommentThread({ activityId, comments, currentUserId }: CommentTh
     startTransition(async () => {
       await addComment(activityId, text)
       setText('')
+      router.refresh()
     })
   }
 
   function handleDelete(commentId: string) {
-    startTransition(async () => { await deleteComment(commentId) })
+    startTransition(async () => {
+      await deleteComment(commentId)
+      router.refresh()
+    })
   }
 
   return (

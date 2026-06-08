@@ -8,19 +8,27 @@ export async function toggleLike(activityId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
-  const { data: existing } = await supabase
+  // Delete the like if it exists; if 0 rows affected, no like was present
+  const { data: deleted, error: deleteError } = await supabase
     .from('likes')
-    .select('id')
+    .delete()
     .eq('user_id', user.id)
     .eq('activity_id', activityId)
-    .maybeSingle()
+    .select('id')
 
-  if (existing) {
-    await supabase.from('likes').delete().eq('id', existing.id)
-  } else {
-    await supabase.from('likes').insert({ user_id: user.id, activity_id: activityId })
+  if (deleteError) throw deleteError
+
+  if (deleted && deleted.length > 0) {
+    revalidatePath('/feed')
+    return false
   }
 
+  const { error: insertError } = await supabase
+    .from('likes')
+    .insert({ user_id: user.id, activity_id: activityId })
+
+  if (insertError) throw insertError
+
   revalidatePath('/feed')
-  return !existing
+  return true
 }

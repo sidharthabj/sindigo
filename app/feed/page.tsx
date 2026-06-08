@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { ActivityCard } from '@/components/feed/activity-card'
 import type { ActivityWithDetails } from '@/lib/types'
 
@@ -11,16 +12,18 @@ export default async function FeedPage({
   searchParams: Promise<{ page?: string }>
 }) {
   const { page: pageParam } = await searchParams
-  const page = parseInt(pageParam ?? '1')
+  const page = Math.max(1, parseInt(pageParam ?? '1') || 1)
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: followRows } = await supabase
+  const { data: followRows, error: followsError } = await supabase
     .from('follows')
     .select('following_id')
     .eq('follower_id', user.id)
+
+  if (followsError) throw followsError
 
   const followingIds = (followRows ?? []).map(r => r.following_id)
 
@@ -79,12 +82,13 @@ export default async function FeedPage({
           ))}
           {activities.length === PAGE_SIZE && (
             <div className="text-center pt-4">
-              <a
+              <Link
                 href={`/feed?page=${page + 1}`}
                 className="text-sm text-muted-foreground hover:underline"
+                scroll={false}
               >
                 Load more
-              </a>
+              </Link>
             </div>
           )}
         </div>
