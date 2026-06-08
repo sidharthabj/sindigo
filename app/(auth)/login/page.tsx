@@ -26,14 +26,6 @@ export default function LoginPage() {
     router.refresh()
   }
 
-  async function handleGoogle() {
-    const supabase = createClient()
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${location.origin}/auth/callback` },
-    })
-  }
-
   return (
     <div className="max-w-sm mx-auto mt-20 px-4">
       <h1 className="text-2xl font-bold mb-8">Log in</h1>
@@ -51,14 +43,6 @@ export default function LoginPage() {
           {loading ? 'Logging in…' : 'Log in'}
         </Button>
       </form>
-      <div className="my-6 flex items-center gap-3">
-        <div className="flex-1 h-px bg-border" />
-        <span className="text-sm text-muted-foreground">or</span>
-        <div className="flex-1 h-px bg-border" />
-      </div>
-      <Button variant="outline" className="w-full" onClick={handleGoogle}>
-        Continue with Google
-      </Button>
       <p className="mt-6 text-sm text-center text-muted-foreground">
         No account?{' '}
         <Link href="/signup" className="text-foreground underline underline-offset-4 hover:text-foreground/80">
