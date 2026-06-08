@@ -30,33 +30,36 @@ export default async function FeedPage({
   const from = (page - 1) * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
 
-  const { count: totalCount } = await supabase
-    .from('activities')
-    .select('id', { count: 'exact', head: true })
-    .in('user_id', followingIds)
+  // Run count and data queries in parallel
+  const [{ count: totalCount }, { data: rawActivities }] = await Promise.all([
+    supabase
+      .from('activities')
+      .select('id', { count: 'exact', head: true })
+      .in('user_id', followingIds),
+    supabase
+      .from('activities')
+      .select(`
+        *,
+        profile:profiles!user_id(username, display_name, avatar_url),
+        shelf_entry:shelf_entries!shelf_entry_id(
+          *,
+          book:books(*)
+        ),
+        followed_user:profiles!followed_user_id(username, display_name, avatar_url),
+        likes(id, user_id),
+        comments(
+          *,
+          profile:profiles!user_id(username, display_name, avatar_url)
+        )
+      `)
+      .in('user_id', followingIds)
+      .order('created_at', { ascending: false })
+      .range(from, to),
+  ])
 
   const totalPages = Math.max(1, Math.ceil((totalCount ?? 0) / PAGE_SIZE))
-  const safePage = Math.min(page, totalPages)
 
-  const { data: rawActivities } = await supabase
-    .from('activities')
-    .select(`
-      *,
-      profile:profiles!user_id(username, display_name, avatar_url),
-      shelf_entry:shelf_entries!shelf_entry_id(
-        *,
-        book:books(*)
-      ),
-      followed_user:profiles!followed_user_id(username, display_name, avatar_url),
-      likes(id, user_id),
-      comments(
-        *,
-        profile:profiles!user_id(username, display_name, avatar_url)
-      )
-    `)
-    .in('user_id', followingIds)
-    .order('created_at', { ascending: false })
-    .range(from, to)
+  if (page > totalPages) redirect(`/feed?page=${totalPages}`)
 
   const activities: ActivityWithDetails[] = (rawActivities ?? []).map(a => ({
     ...a,
@@ -81,9 +84,9 @@ export default async function FeedPage({
               currentUserId={user.id}
             />
           ))}
-          <FeedPagination currentPage={safePage} totalPages={totalPages} />
         </div>
       )}
+      <FeedPagination currentPage={page} totalPages={totalPages} />
     </div>
   )
 }
