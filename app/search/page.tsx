@@ -1,8 +1,14 @@
+import { BookSearchModal } from '@/components/books/book-search-modal'
+import { Button } from '@/components/ui/button'
+
 export default function SearchPage() {
   return (
-    <div className="max-w-2xl mx-auto py-16 px-4 text-center">
-      <h1 className="text-2xl font-semibold mb-2">Search Books</h1>
-      <p className="text-muted-foreground">Book search coming soon.</p>
+    <div className="max-w-2xl mx-auto px-4 py-12 text-center">
+      <h1 className="text-2xl font-bold mb-2">Add a book</h1>
+      <p className="text-muted-foreground mb-6">
+        Search for a book to add to one of your shelves.
+      </p>
+      <BookSearchModal trigger={<Button size="lg">Search for a book</Button>} defaultStatus="wishlist" />
     </div>
   )
 }

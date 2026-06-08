@@ -18,25 +18,35 @@ export type Database = {
         Row: {
           activity_type: Database["public"]["Enums"]["activity_type"]
           created_at: string | null
+          followed_user_id: string | null
           id: string
-          shelf_entry_id: string
+          shelf_entry_id: string | null
           user_id: string
         }
         Insert: {
           activity_type: Database["public"]["Enums"]["activity_type"]
           created_at?: string | null
+          followed_user_id?: string | null
           id?: string
-          shelf_entry_id: string
+          shelf_entry_id?: string | null
           user_id: string
         }
         Update: {
           activity_type?: Database["public"]["Enums"]["activity_type"]
           created_at?: string | null
+          followed_user_id?: string | null
           id?: string
-          shelf_entry_id?: string
+          shelf_entry_id?: string | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "activities_followed_user_id_fkey"
+            columns: ["followed_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "activities_shelf_entry_id_fkey"
             columns: ["shelf_entry_id"]
@@ -288,6 +298,7 @@ export type Database = {
         | "started_reading"
         | "finished_book"
         | "wrote_review"
+        | "followed_user"
       shelf_status: "wishlist" | "reading" | "read"
     }
     CompositeTypes: {
@@ -421,6 +432,7 @@ export const Constants = {
         "started_reading",
         "finished_book",
         "wrote_review",
+        "followed_user",
       ],
       shelf_status: ["wishlist", "reading", "read"],
     },

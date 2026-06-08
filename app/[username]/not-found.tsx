@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 
 export default function ProfileNotFound() {
   return (
@@ -8,7 +8,7 @@ export default function ProfileNotFound() {
       <p className="text-muted-foreground mb-6">
         This profile doesn&apos;t exist or may have been removed.
       </p>
-      <Button asChild><Link href="/">Go home</Link></Button>
+      <Link href="/" className={buttonVariants()}>Go home</Link>
     </div>
   )
 }

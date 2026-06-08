@@ -65,7 +65,7 @@ export function CommentThread({ activityId, comments, currentUserId }: CommentTh
               </div>
               {currentUserId === c.user_id && (
                 <button
-                  className="text-xs text-muted-foreground hover:text-red-500"
+                  className="text-xs text-muted-foreground hover:text-red-500 hover:underline cursor-pointer"
                   onClick={() => handleDelete(c.id)}
                   disabled={isPending}
                 >

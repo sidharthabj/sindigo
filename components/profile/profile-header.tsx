@@ -18,7 +18,7 @@ export function ProfileHeader({
   profile, followerCount, followingCount, isFollowing, isOwner, currentUserId
 }: ProfileHeaderProps) {
   return (
-    <div className="flex items-start gap-4 py-6">
+    <div className="flex items-start gap-4 py-4">
       <Avatar className="w-16 h-16">
         <AvatarImage src={profile.avatar_url ?? undefined} />
         <AvatarFallback>{profile.display_name[0].toUpperCase()}</AvatarFallback>

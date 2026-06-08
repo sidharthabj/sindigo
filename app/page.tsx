@@ -1,7 +1,14 @@
-import { Button } from '@/components/ui/button'
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) redirect('/feed')
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-24 text-center">
       <h1 className="text-4xl font-bold tracking-tight mb-4">Sindigo</h1>
@@ -11,8 +18,8 @@ export default function HomePage() {
         Your personal bookshelf, made social.
       </p>
       <div className="flex gap-3 justify-center">
-        <Button asChild size="lg"><Link href="/signup">Get started</Link></Button>
-        <Button asChild size="lg" variant="outline"><Link href="/login">Log in</Link></Button>
+        <Link href="/signup" className={cn(buttonVariants({ size: 'lg' }))}>Get started</Link>
+        <Link href="/login" className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}>Log in</Link>
       </div>
     </div>
   )

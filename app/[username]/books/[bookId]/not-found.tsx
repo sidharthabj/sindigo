@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 
 export default function BookNotFound() {
   return (
@@ -8,7 +8,7 @@ export default function BookNotFound() {
       <p className="text-muted-foreground mb-6">
         This book isn&apos;t on this shelf, or the link may be outdated.
       </p>
-      <Button asChild><Link href="/">Go home</Link></Button>
+      <Link href="/" className={buttonVariants()}>Go home</Link>
     </div>
   )
 }
