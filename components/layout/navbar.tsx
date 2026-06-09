@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient, getUser } from '@/lib/supabase/server'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { MobileMenu } from './mobile-menu'
 
 export async function Navbar() {
   const user = await getUser()
@@ -18,13 +19,13 @@ export async function Navbar() {
   }
 
   return (
-    <nav className="border-b px-4 py-3 flex items-center justify-between">
+    <nav className="border-b px-4 py-3 flex items-center justify-between relative">
       <Link href={user ? '/feed' : '/'} className="font-bold text-lg tracking-tight">
         Sindigo
       </Link>
-      <div className="flex gap-2">
-        {user ? (
-          <>
+      {user ? (
+        <>
+          <div className="hidden sm:flex gap-2">
             <Link href="/feed" className={cn(buttonVariants({ variant: 'ghost' }))}>Feed</Link>
             <Link href="/find-people" className={cn(buttonVariants({ variant: 'ghost' }))}>Find People</Link>
             <Link href="/search" className={cn(buttonVariants({ variant: 'ghost' }))}>Add Book</Link>
@@ -32,14 +33,15 @@ export async function Navbar() {
               <Link href={`/${username}`} className={cn(buttonVariants({ variant: 'ghost' }))}>Profile</Link>
             )}
             <Link href="/settings" className={cn(buttonVariants({ variant: 'ghost' }))}>Settings</Link>
-          </>
-        ) : (
-          <>
-            <Link href="/login" className={cn(buttonVariants({ variant: 'ghost' }))}>Log in</Link>
-            <Link href="/signup" className={cn(buttonVariants({ variant: 'default' }))}>Sign up</Link>
-          </>
-        )}
-      </div>
+          </div>
+          <MobileMenu username={username} />
+        </>
+      ) : (
+        <div className="flex gap-2">
+          <Link href="/login" className={cn(buttonVariants({ variant: 'ghost' }))}>Log in</Link>
+          <Link href="/signup" className={cn(buttonVariants({ variant: 'default' }))}>Sign up</Link>
+        </div>
+      )}
     </nav>
   )
 }
