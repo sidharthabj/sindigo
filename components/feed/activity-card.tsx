@@ -105,13 +105,15 @@ export function ActivityCard({ activity, currentUserId }: ActivityCardProps) {
           </div>
 
           {activity.activity_type === 'wrote_review' && (
-            <div className="pl-12 space-y-2">
-              {entry.rating && <Rating value={entry.rating} />}
-              {entry.note && (
-                <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
-                  {entry.note}
-                </p>
-              )}
+            <div className="pl-12">
+              <div className="border rounded-md px-3 py-2.5 space-y-1.5 bg-muted/30">
+                {entry.rating && <Rating value={entry.rating} />}
+                {entry.note && (
+                  <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+                    {entry.note}
+                  </p>
+                )}
+              </div>
             </div>
           )}
 
