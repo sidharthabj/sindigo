@@ -37,7 +37,7 @@ export default function LoginPage() {
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
-            <Link href="/forgot-password" className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground">
+            <Link href="/forgot-password" className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground cursor-pointer">
               Forgot password?
             </Link>
           </div>
@@ -50,7 +50,7 @@ export default function LoginPage() {
       </form>
       <p className="mt-6 text-sm text-center text-muted-foreground">
         No account?{' '}
-        <Link href="/signup" className="text-foreground underline underline-offset-4 hover:text-foreground/80">
+        <Link href="/signup" className="text-foreground underline underline-offset-4 hover:text-foreground/80 cursor-pointer">
           Sign up
         </Link>
       </p>
