@@ -39,7 +39,6 @@ export function ShelfSection({ title, entries, username, horizontal }: ShelfSect
               className={horizontal ? 'flex-shrink-0 w-28' : ''}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
               <BookCard entry={entry} username={username} />
