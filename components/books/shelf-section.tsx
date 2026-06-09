@@ -17,7 +17,7 @@ export function ShelfSection({ title, entries, username, horizontal }: ShelfSect
       <div className={
         horizontal
           ? 'flex gap-4 overflow-x-auto pb-2'
-          : 'grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4'
+          : 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4'
       }>
         {entries.map(entry => (
           <div key={entry.id} className={horizontal ? 'flex-shrink-0 w-28' : ''}>
