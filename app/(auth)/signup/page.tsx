@@ -62,7 +62,7 @@ export default function SignupPage() {
       </form>
       <p className="mt-6 text-sm text-center text-muted-foreground">
         Have an account?{' '}
-        <Link href="/login" className="text-foreground underline underline-offset-4 hover:text-foreground/80">
+        <Link href="/login" className="text-foreground underline underline-offset-4 hover:text-foreground/80 cursor-pointer">
           Log in
         </Link>
       </p>
