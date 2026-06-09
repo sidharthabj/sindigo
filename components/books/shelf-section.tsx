@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { BookCard } from './book-card'
 import type { ShelfEntryWithBook } from '@/lib/types'
 
-const SHELF_INITIAL_COUNT = 6
+const SHELF_INITIAL_COUNT = 5
 
 interface ShelfSectionProps {
   title: string
@@ -54,7 +54,7 @@ export function ShelfSection({ title, entries, username, horizontal }: ShelfSect
           onClick={() => setIsExpanded(prev => !prev)}
           className="mt-4 w-full text-sm text-muted-foreground hover:text-foreground transition-colors text-center"
         >
-          {isExpanded ? 'Show fewer' : `Show all ${entries.length} books`}
+          {isExpanded ? 'Show fewer' : `Show ${entries.length - SHELF_INITIAL_COUNT} more`}
         </button>
       )}
     </section>
