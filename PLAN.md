@@ -2994,11 +2994,11 @@ Update the Project Status table at the top of this file to ✅ Complete.
 
 Before deploying to Vercel:
 
-- [ ] All 6 phases complete and marked ✅ in Project Status table
-- [ ] `.env.local` values added to Vercel environment variables via `vercel env add`
-- [ ] Google OAuth redirect URL updated in Google Cloud Console to production domain
-- [ ] Supabase Auth → URL Configuration → Site URL set to production domain
-- [ ] Supabase Auth → URL Configuration → Redirect URLs includes production domain `/auth/callback`
-- [ ] Run `npm run build` locally — zero errors
-- [ ] Run `npm run test:run` — all tests pass
-- [ ] Deploy: `vercel --prod`
+- [x] All 6 phases complete and marked ✅ in Project Status table
+- [x] `.env.local` values added to Vercel environment variables via `vercel env add`
+- [x] Google OAuth redirect URL updated in Google Cloud Console to production domain
+- [x] Supabase Auth → URL Configuration → Site URL set to production domain
+- [x] Supabase Auth → URL Configuration → Redirect URLs includes production domain `/auth/callback`
+- [x] Run `npm run build` locally — zero errors
+- [x] Run `npm run test:run` — all tests pass
+- [x] Deploy: `vercel --prod`
