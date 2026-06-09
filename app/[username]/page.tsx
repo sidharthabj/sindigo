@@ -28,7 +28,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
       .from('shelf_entries')
       .select('*, book:books(*)')
       .eq('user_id', profile.id)
-      .order('updated_at', { ascending: false }),
+      .order('updated_at', { ascending: false })
+      .limit(200),
     supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', profile.id),
     supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', profile.id),
     user
@@ -52,9 +53,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         currentUserId={user?.id ?? null}
       />
       <div className="space-y-6 pb-10">
-        <ShelfSection title="Currently Reading" entries={reading} username={username} horizontal />
-        <ShelfSection title="Read" entries={read} username={username} />
-        <ShelfSection title="Wishlist" entries={wishlist} username={username} />
+        <ShelfSection key={`${username}-reading`} title="Currently Reading" entries={reading} username={username} horizontal />
+        <ShelfSection key={`${username}-read`} title="Read" entries={read} username={username} />
+        <ShelfSection key={`${username}-wishlist`} title="Wishlist" entries={wishlist} username={username} />
       </div>
     </div>
   )

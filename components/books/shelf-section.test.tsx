@@ -1,5 +1,4 @@
-// components/books/shelf-section.test.tsx
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi } from 'vitest'
 import { ShelfSection } from './shelf-section'
@@ -43,6 +42,18 @@ function makeEntries(count: number): ShelfEntryWithBook[] {
   return Array.from({ length: count }, (_, i) => makeEntry(String(i + 1)))
 }
 
+function getShelfLinks(title: string) {
+  const heading = screen.getByRole('heading', { name: title })
+  const section = heading.closest('section')!
+  return within(section).getAllByRole('link')
+}
+
+function queryShelfLinks(title: string) {
+  const heading = screen.getByRole('heading', { name: title })
+  const section = heading.closest('section')!
+  return within(section).queryAllByRole('link')
+}
+
 describe('ShelfSection', () => {
   it('renders nothing when entries is empty', () => {
     const { container } = render(<ShelfSection title="Read" entries={[]} username="alice" />)
@@ -51,12 +62,12 @@ describe('ShelfSection', () => {
 
   it('shows all entries when count is 5 or fewer', () => {
     render(<ShelfSection title="Read" entries={makeEntries(5)} username="alice" />)
-    expect(screen.getAllByRole('link')).toHaveLength(5)
+    expect(getShelfLinks('Read')).toHaveLength(5)
   })
 
   it('shows only 5 entries by default when count exceeds 5', () => {
     render(<ShelfSection title="Read" entries={makeEntries(10)} username="alice" />)
-    expect(screen.getAllByRole('link')).toHaveLength(5)
+    expect(getShelfLinks('Read')).toHaveLength(5)
   })
 
   it('does not render a toggle button when entries are 5 or fewer', () => {
@@ -73,7 +84,7 @@ describe('ShelfSection', () => {
     const user = userEvent.setup()
     render(<ShelfSection title="Read" entries={makeEntries(10)} username="alice" />)
     await user.click(screen.getByRole('button', { name: 'Show 5 more' }))
-    expect(screen.getAllByRole('link')).toHaveLength(10)
+    expect(getShelfLinks('Read')).toHaveLength(10)
   })
 
   it('changes button label to "Show fewer" when expanded', async () => {
@@ -88,14 +99,35 @@ describe('ShelfSection', () => {
     render(<ShelfSection title="Read" entries={makeEntries(10)} username="alice" />)
     await user.click(screen.getByRole('button', { name: 'Show 5 more' }))
     await user.click(screen.getByRole('button', { name: 'Show fewer' }))
-    expect(screen.getAllByRole('link')).toHaveLength(5)
+    expect(getShelfLinks('Read')).toHaveLength(5)
   })
 
   it('shows all entries without truncation in horizontal mode', () => {
     render(
       <ShelfSection title="Currently Reading" entries={makeEntries(10)} username="alice" horizontal />
     )
-    expect(screen.getAllByRole('link')).toHaveLength(10)
+    expect(getShelfLinks('Currently Reading')).toHaveLength(10)
     expect(screen.queryByRole('button')).toBeNull()
+  })
+
+  it('link count is resilient to extra links outside the shelf grid', () => {
+    render(
+      <>
+        <ShelfSection title="Read" entries={makeEntries(5)} username="alice" />
+        <a href="/extra">Extra link outside shelf</a>
+      </>
+    )
+    expect(getShelfLinks('Read')).toHaveLength(5)
+  })
+
+  it('shows correct count when two ShelfSections are rendered together', () => {
+    render(
+      <>
+        <ShelfSection title="Read" entries={makeEntries(3)} username="alice" />
+        <ShelfSection title="Wishlist" entries={makeEntries(7)} username="alice" />
+      </>
+    )
+    expect(getShelfLinks('Read')).toHaveLength(3)
+    expect(getShelfLinks('Wishlist')).toHaveLength(5)
   })
 })

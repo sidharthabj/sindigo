@@ -35,7 +35,7 @@ export default function ProfileLoading() {
         {/* Read — responsive grid matching ShelfSection */}
         <section>
           <Skeleton className="h-6 w-12 mb-4" />
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="space-y-2">
                 <Skeleton className="aspect-[2/3] rounded-md" />
@@ -49,7 +49,7 @@ export default function ProfileLoading() {
         {/* Wishlist — responsive grid matching ShelfSection */}
         <section>
           <Skeleton className="h-6 w-20 mb-4" />
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="space-y-2">
                 <Skeleton className="aspect-[2/3] rounded-md" />
