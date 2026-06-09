@@ -167,11 +167,13 @@ export default function SettingsPage() {
           <Label htmlFor="bio">Bio</Label>
           <Textarea id="bio" value={bio} onChange={e => setBio(e.target.value)} rows={3} />
         </div>
-        {successMessage && <p className="text-sm text-green-600">{successMessage}</p>}
         {errorMessage && <p className="text-sm text-red-500">{errorMessage}</p>}
-        <Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save changes'}</Button>
+        <div className="flex items-center gap-4">
+          <Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save changes'}</Button>
+          {successMessage && <p className="text-sm text-green-600">{successMessage}</p>}
+        </div>
       </form>
-      <div className="mt-8 border-t pt-6">
+      <div className="mt-6 border-t pt-6">
         <Button variant="destructive" onClick={handleSignOut}>Sign out</Button>
       </div>
     </div>
