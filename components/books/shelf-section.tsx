@@ -49,6 +49,8 @@ export function ShelfSection({ title, entries, username, horizontal }: ShelfSect
       </div>
       {showToggle && (
         <button
+          type="button"
+          aria-expanded={isExpanded}
           onClick={() => setIsExpanded(prev => !prev)}
           className="mt-4 w-full text-sm text-muted-foreground hover:text-foreground transition-colors text-center"
         >
