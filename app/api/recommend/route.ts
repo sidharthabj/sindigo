@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
   let rawRecs: Array<{ title: string; author: string; reason: string }>
   try {
     const message = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
+      model: 'claude-haiku-4-5',
       max_tokens: 1024,
       temperature: 0.7,
       messages: [{ role: 'user', content: prompt }],
