@@ -20,6 +20,7 @@
 | Phase 4: Book Detail | ✅ Complete | Book detail page with opening animation |
 | Phase 5: Activity Feed | ✅ Complete | Feed with likes and comments |
 | Phase 6: Polish | ✅ Complete | Landing page, empty states, error states |
+| Phase 7: AI Recommendations | 🚧 In Progress | /discover (public) and /recommendation (in-app) live |
 
 **Update status column as work progresses:** ⬜ Not Started → 🚧 In Progress → ✅ Complete
 
@@ -3002,3 +3003,1239 @@ Before deploying to Vercel:
 - [x] Run `npm run build` locally — zero errors
 - [x] Run `npm run test:run` — all tests pass
 - [x] Deploy: `vercel --prod`
+
+---
+
+## Phase 7: AI Book Recommendations
+
+> **Spec:** `docs/superpowers/specs/2026-06-09-ai-recommendations-design.md`
+> **Full plan:** `docs/superpowers/plans/2026-06-09-ai-recommendations.md`
+
+### Task 13: Dependencies, types, and route protection
+
+**Files:**
+- Modify: `lib/types/index.ts`
+- Modify: `proxy.ts`
+
+- [x] **Step 1: Install runtime dependencies**
+
+```bash
+npm install @anthropic-ai/sdk @upstash/ratelimit @upstash/redis
+```
+
+Expected: packages added to `node_modules` and `package.json` dependencies.
+
+- [x] **Step 2: Add `ANTHROPIC_API_KEY` to `.env.local`**
+
+Open `.env.local` and add:
+
+```
+ANTHROPIC_API_KEY=your-key-here
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+```
+
+Get the Anthropic API key from [console.anthropic.com](https://console.anthropic.com) → API Keys → Create key. Set a monthly spending limit in the console under Billing → Limits before using the key.
+
+- [ ] **Step 3: Set up Upstash Redis**
+
+Go to [vercel.com/integrations](https://vercel.com/integrations) → search "Upstash" → add to your Sindigo project. Upstash will create a Redis database and auto-populate `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` in Vercel env vars.
+
+Copy those two values from Vercel dashboard → Settings → Environment Variables into `.env.local`.
+
+- [x] **Step 4: Add `InputBook` and `Recommendation` types to `lib/types/index.ts`**
+
+Append to the bottom of `lib/types/index.ts`:
+
+```typescript
+// Recommendation feature types
+export interface InputBook {
+  id: string           // google_books_id — used as selection key
+  title: string
+  author: string
+  coverUrl: string | null
+}
+
+export interface Recommendation {
+  title: string
+  author: string
+  reason: string
+  coverUrl: string | null
+  googleBooksId: string | null
+}
+```
+
+- [x] **Step 5: Add `/recommendation` to `PROTECTED_ROUTES` in `proxy.ts`**
+
+Change:
+
+```typescript
+export const PROTECTED_ROUTES = ['/feed', '/search', '/settings', '/find-people']
+```
+
+To:
+
+```typescript
+export const PROTECTED_ROUTES = ['/feed', '/search', '/settings', '/find-people', '/recommendation']
+```
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add lib/types/index.ts proxy.ts package.json package-lock.json
+git commit -m "feat: install AI recommendation deps and add types and route protection"
+```
+
+---
+
+### Task 14: Validation utility (TDD) + API route
+
+**Files:**
+- Create: `lib/recommendations/validate.ts`
+- Create: `lib/recommendations/validate.test.ts`
+- Create: `lib/recommendations/cover.ts`
+- Create: `app/api/recommend/route.ts`
+
+- [ ] **Step 1: Write failing tests for `validateBooks`**
+
+Create `lib/recommendations/validate.test.ts`:
+
+```typescript
+import { describe, it, expect } from 'vitest'
+import { validateBooks } from './validate'
+
+describe('validateBooks', () => {
+  const valid = [
+    { title: 'Dune', author: 'Frank Herbert' },
+    { title: 'Foundation', author: 'Isaac Asimov' },
+  ]
+
+  it('accepts 2 valid books', () => { expect(validateBooks(valid)).toBe(true) })
+  it('accepts 5 valid books', () => {
+    const five = Array.from({ length: 5 }, (_, i) => ({ title: `Book ${i}`, author: `Author ${i}` }))
+    expect(validateBooks(five)).toBe(true)
+  })
+  it('rejects 1 book', () => {
+    expect(validateBooks([{ title: 'Dune', author: 'Frank Herbert' }])).toBe(false)
+  })
+  it('rejects 6 books', () => {
+    const six = Array.from({ length: 6 }, (_, i) => ({ title: `Book ${i}`, author: `Author ${i}` }))
+    expect(validateBooks(six)).toBe(false)
+  })
+  it('rejects null', () => { expect(validateBooks(null)).toBe(false) })
+  it('rejects non-array', () => {
+    expect(validateBooks('books')).toBe(false)
+    expect(validateBooks({})).toBe(false)
+  })
+  it('rejects book missing author', () => {
+    expect(validateBooks([{ title: 'Dune' }, { title: 'Foundation', author: 'Asimov' }])).toBe(false)
+  })
+  it('rejects book missing title', () => {
+    expect(validateBooks([{ author: 'Herbert' }, { title: 'Foundation', author: 'Asimov' }])).toBe(false)
+  })
+  it('rejects title over 100 chars', () => {
+    expect(validateBooks([
+      { title: 'a'.repeat(101), author: 'Author' },
+      { title: 'Valid', author: 'Author 2' },
+    ])).toBe(false)
+  })
+  it('rejects author over 100 chars', () => {
+    expect(validateBooks([
+      { title: 'Valid', author: 'a'.repeat(101) },
+      { title: 'Valid 2', author: 'Author' },
+    ])).toBe(false)
+  })
+  it('rejects empty title', () => {
+    expect(validateBooks([
+      { title: '', author: 'Author' },
+      { title: 'Valid', author: 'Author' },
+    ])).toBe(false)
+  })
+  it('rejects empty author', () => {
+    expect(validateBooks([
+      { title: 'Valid', author: '' },
+      { title: 'Valid 2', author: 'Author' },
+    ])).toBe(false)
+  })
+})
+```
+
+- [ ] **Step 2: Run tests to confirm they fail**
+
+```bash
+npm run test:run lib/recommendations/validate.test.ts
+```
+
+Expected: FAIL — `validate.ts` does not exist yet.
+
+- [ ] **Step 3: Create `lib/recommendations/validate.ts`**
+
+```typescript
+export interface InputBookRaw {
+  title: string
+  author: string
+}
+
+export function validateBooks(books: unknown): books is InputBookRaw[] {
+  if (!Array.isArray(books)) return false
+  if (books.length < 2 || books.length > 5) return false
+  return books.every(b => {
+    if (typeof b !== 'object' || b === null) return false
+    const { title, author } = b as any
+    return (
+      typeof title === 'string' && title.length > 0 && title.length <= 100 &&
+      typeof author === 'string' && author.length > 0 && author.length <= 100
+    )
+  })
+}
+```
+
+- [ ] **Step 4: Run tests to confirm they pass**
+
+```bash
+npm run test:run lib/recommendations/validate.test.ts
+```
+
+Expected: 12 tests PASS.
+
+- [ ] **Step 5: Create `lib/recommendations/cover.ts`**
+
+```typescript
+export async function fetchCoverAndId(
+  title: string,
+  author: string
+): Promise<{ coverUrl: string | null; googleBooksId: string | null }> {
+  try {
+    const url = new URL('https://www.googleapis.com/books/v1/volumes')
+    url.searchParams.set('q', `intitle:${title} inauthor:${author}`)
+    url.searchParams.set('maxResults', '1')
+    url.searchParams.set('printType', 'books')
+    if (process.env.GOOGLE_BOOKS_API_KEY) {
+      url.searchParams.set('key', process.env.GOOGLE_BOOKS_API_KEY)
+    }
+    const res = await fetch(url.toString(), { next: { revalidate: 3600 } })
+    if (!res.ok) return { coverUrl: null, googleBooksId: null }
+    const data = await res.json()
+    const item = data.items?.[0]
+    if (!item) return { coverUrl: null, googleBooksId: null }
+    const thumbnail = item.volumeInfo?.imageLinks?.thumbnail
+    return {
+      coverUrl: thumbnail ? (thumbnail as string).replace('http:', 'https:') : null,
+      googleBooksId: (item.id as string) ?? null,
+    }
+  } catch {
+    return { coverUrl: null, googleBooksId: null }
+  }
+}
+```
+
+- [ ] **Step 6: Create `app/api/recommend/route.ts`**
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
+import { createClient } from '@/lib/supabase/server'
+import { validateBooks } from '@/lib/recommendations/validate'
+import { fetchCoverAndId } from '@/lib/recommendations/cover'
+
+function buildRatelimiters() {
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+    return null
+  }
+  const redis = Redis.fromEnv()
+  return {
+    ip: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, '1 h') }),
+    user: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 d') }),
+  }
+}
+
+const anthropic = new Anthropic()
+
+export async function POST(request: NextRequest) {
+  if (process.env.NODE_ENV === 'production') {
+    const origin = request.headers.get('origin') ?? ''
+    const host = request.headers.get('host') ?? ''
+    if (host && !origin.includes(host)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+  }
+
+  let body: unknown
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+
+  const { books } = body as any
+
+  if (!validateBooks(books)) {
+    return NextResponse.json(
+      { error: 'Provide between 2 and 5 books, each with a title and author under 100 characters.' },
+      { status: 400 }
+    )
+  }
+
+  const limiters = buildRatelimiters()
+  if (limiters) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (user) {
+      const { success } = await limiters.user.limit(`user:${user.id}`)
+      if (!success) {
+        return NextResponse.json(
+          { error: "You've reached your daily recommendation limit. Try again tomorrow." },
+          { status: 429 }
+        )
+      }
+    } else {
+      const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? '127.0.0.1'
+      const { success } = await limiters.ip.limit(`ip:${ip}`)
+      if (!success) {
+        return NextResponse.json(
+          { error: 'Too many requests. Please try again in an hour.' },
+          { status: 429 }
+        )
+      }
+    }
+  }
+
+  const bookList = books
+    .map((b: { title: string; author: string }) => `- "${b.title}" by ${b.author}`)
+    .join('\n')
+
+  const prompt = `You are a knowledgeable book recommendation engine. A reader loves these books:\n${bookList}\n\nRecommend exactly 5 books they would enjoy next. Return ONLY a valid JSON array — no other text, no markdown. Each object must have these exact fields:\n- "title": the book's full title\n- "author": the author's full name\n- "reason": one sentence explaining why this matches their taste\n\nExample: [{"title":"The Name of the Wind","author":"Patrick Rothfuss","reason":"Like Dune, it builds an intricate world through a gifted protagonist navigating politics and power."}]`
+
+  let rawRecs: Array<{ title: string; author: string; reason: string }>
+  try {
+    const message = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1024,
+      temperature: 0.7,
+      messages: [{ role: 'user', content: prompt }],
+    })
+    const text = message.content[0].type === 'text' ? message.content[0].text : ''
+    rawRecs = JSON.parse(text.trim())
+    if (!Array.isArray(rawRecs) || rawRecs.length === 0) throw new Error('Invalid format')
+  } catch {
+    return NextResponse.json(
+      { error: 'Failed to generate recommendations. Please try again.' },
+      { status: 500 }
+    )
+  }
+
+  const recommendations = await Promise.all(
+    rawRecs.slice(0, 5).map(async (rec) => {
+      const { coverUrl, googleBooksId } = await fetchCoverAndId(rec.title, rec.author)
+      return { title: rec.title, author: rec.author, reason: rec.reason, coverUrl, googleBooksId }
+    })
+  )
+
+  return NextResponse.json({ recommendations })
+}
+```
+
+- [ ] **Step 7: Run the full test suite**
+
+```bash
+npm run test:run
+```
+
+Expected: All existing tests plus the 12 new validation tests PASS.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add lib/recommendations/ app/api/recommend/
+git commit -m "feat: add validateBooks utility and /api/recommend route with rate limiting"
+```
+
+---
+
+### Task 15: FloatingBooksBg and BookInputSearch
+
+**Files:**
+- Create: `components/recommendations/floating-books-bg.tsx`
+- Create: `components/recommendations/book-input-search.tsx`
+
+- [ ] **Step 1: Create `components/recommendations/floating-books-bg.tsx`**
+
+```typescript
+'use client'
+
+import { motion } from 'framer-motion'
+
+const FLOATERS = [
+  { emoji: '📖', x: 5,  y: 10, dx: 40,  dy: -30, r: 12,  dur: 12, delay: 0   },
+  { emoji: '📚', x: 15, y: 70, dx: -25, dy: -40, r: -8,  dur: 10, delay: 1.2 },
+  { emoji: '📕', x: 75, y: 15, dx: 30,  dy: 35,  r: 15,  dur: 14, delay: 0.5 },
+  { emoji: '📗', x: 85, y: 60, dx: -35, dy: -25, r: -12, dur: 11, delay: 2.1 },
+  { emoji: '📘', x: 45, y: 5,  dx: 20,  dy: 40,  r: 8,   dur: 13, delay: 0.8 },
+  { emoji: '📙', x: 25, y: 85, dx: -30, dy: -20, r: -10, dur: 9,  delay: 1.7 },
+  { emoji: '📔', x: 65, y: 80, dx: 25,  dy: -35, r: 14,  dur: 11, delay: 0.3 },
+  { emoji: '📓', x: 90, y: 35, dx: -20, dy: 30,  r: -6,  dur: 13, delay: 2.5 },
+]
+
+export function FloatingBooksBg() {
+  return (
+    <div
+      className="absolute inset-0 overflow-hidden pointer-events-none select-none"
+      aria-hidden="true"
+    >
+      {FLOATERS.map((f, i) => (
+        <motion.div
+          key={i}
+          className="absolute text-2xl"
+          style={{ left: `${f.x}%`, top: `${f.y}%` }}
+          animate={{
+            x: [0, f.dx, 0],
+            y: [0, f.dy, 0],
+            rotate: [0, f.r, 0],
+            opacity: [0.18, 0.35, 0.18],
+          }}
+          transition={{
+            duration: f.dur,
+            repeat: Infinity,
+            delay: f.delay,
+            ease: 'easeInOut',
+          }}
+        >
+          {f.emoji}
+        </motion.div>
+      ))}
+    </div>
+  )
+}
+```
+
+- [ ] **Step 2: Create `components/recommendations/book-input-search.tsx`**
+
+```typescript
+'use client'
+
+import { useState, useRef, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
+import { searchBooks, type GoogleBook } from '@/lib/google-books'
+import type { InputBook } from '@/lib/types'
+
+interface BookInputSearchProps {
+  onAdd: (book: InputBook) => void
+  selectedIds: string[]
+  disabled?: boolean
+  placeholder?: string
+}
+
+export function BookInputSearch({
+  onAdd,
+  selectedIds,
+  disabled,
+  placeholder = 'Search for a book…',
+}: BookInputSearchProps) {
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState<GoogleBook[]>([])
+  const [open, setOpen] = useState(false)
+  const [searching, setSearching] = useState(false)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const selectedSet = new Set(selectedIds)
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    const trimmed = query.trim()
+    if (trimmed.length < 2) { setResults([]); setOpen(false); return }
+    debounceRef.current = setTimeout(async () => {
+      setSearching(true)
+      try {
+        const books = await searchBooks(trimmed)
+        setResults(books.slice(0, 6))
+        setOpen(books.length > 0)
+      } catch {
+        setResults([])
+        setOpen(false)
+      } finally {
+        setSearching(false)
+      }
+    }, 300)
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+  }, [query])
+
+  useEffect(() => {
+    function handleOutsideClick(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleOutsideClick)
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
+  }, [])
+
+  function handleSelect(book: GoogleBook) {
+    if (selectedSet.has(book.id)) return
+    onAdd({ id: book.id, title: book.title, author: book.authors[0] ?? '', coverUrl: book.coverUrl })
+    setQuery('')
+    setResults([])
+    setOpen(false)
+  }
+
+  return (
+    <div ref={containerRef} className="relative">
+      <div className="relative">
+        <input
+          type="text"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder={placeholder}
+          disabled={disabled}
+          className="w-full rounded-xl border bg-background px-4 py-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-ring transition disabled:opacity-50 disabled:cursor-not-allowed"
+        />
+        {searching && (
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+            Searching…
+          </span>
+        )}
+      </div>
+      <AnimatePresence>
+        {open && (
+          <motion.ul
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.15 }}
+            className="absolute z-50 mt-1 w-full rounded-xl border bg-background shadow-lg overflow-hidden"
+          >
+            {results.map((book, i) => {
+              const already = selectedSet.has(book.id)
+              return (
+                <motion.li
+                  key={book.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: i * 0.04 }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleSelect(book)}
+                    disabled={already}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-accent transition disabled:opacity-50 disabled:cursor-default"
+                  >
+                    {book.coverUrl ? (
+                      <Image src={book.coverUrl} alt={book.title} width={28} height={42} className="rounded object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-7 h-[42px] rounded bg-muted flex-shrink-0" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{book.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">{book.authors.join(', ')}</p>
+                    </div>
+                    {already && <span className="ml-auto text-xs text-muted-foreground flex-shrink-0">Added</span>}
+                  </button>
+                </motion.li>
+              )
+            })}
+          </motion.ul>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add components/recommendations/
+git commit -m "feat: add FloatingBooksBg and BookInputSearch components"
+```
+
+---
+
+### Task 16: SelectedBooksList and RecommendationResults
+
+**Files:**
+- Create: `components/recommendations/selected-books-list.tsx`
+- Create: `components/recommendations/recommendation-results.tsx`
+
+- [ ] **Step 1: Create `components/recommendations/selected-books-list.tsx`**
+
+```typescript
+'use client'
+
+import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
+import { X } from 'lucide-react'
+import type { InputBook } from '@/lib/types'
+
+interface SelectedBooksListProps {
+  books: InputBook[]
+  onRemove: (id: string) => void
+}
+
+export function SelectedBooksList({ books, onRemove }: SelectedBooksListProps) {
+  if (books.length === 0) return null
+
+  return (
+    <motion.ul layout className="flex flex-wrap gap-2">
+      <AnimatePresence mode="popLayout">
+        {books.map(book => (
+          <motion.li
+            key={book.id}
+            layout
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+            className="flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 shadow-sm"
+          >
+            {book.coverUrl ? (
+              <Image src={book.coverUrl} alt={book.title} width={20} height={28} className="rounded object-cover flex-shrink-0" />
+            ) : (
+              <div className="w-5 h-7 rounded bg-muted flex-shrink-0" />
+            )}
+            <span className="max-w-[130px] truncate text-sm font-medium">{book.title}</span>
+            <button
+              type="button"
+              onClick={() => onRemove(book.id)}
+              className="ml-0.5 rounded-full p-0.5 hover:bg-accent transition flex-shrink-0 cursor-pointer"
+              aria-label={`Remove ${book.title}`}
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </motion.li>
+        ))}
+      </AnimatePresence>
+    </motion.ul>
+  )
+}
+```
+
+- [ ] **Step 2: Create `components/recommendations/recommendation-results.tsx`**
+
+```typescript
+'use client'
+
+import { motion } from 'framer-motion'
+import Image from 'next/image'
+import type { Recommendation } from '@/lib/types'
+
+interface RecommendationResultsProps {
+  recommendations: Recommendation[]
+  renderAction?: (rec: Recommendation) => React.ReactNode
+}
+
+export function RecommendationResults({ recommendations, renderAction }: RecommendationResultsProps) {
+  return (
+    <ul className="space-y-4">
+      {recommendations.map((rec, i) => (
+        <motion.li
+          key={`${rec.title}-${i}`}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: i * 0.08, duration: 0.3 }}
+          className="flex gap-4 rounded-xl border bg-card p-4 shadow-sm"
+        >
+          <div className="flex-shrink-0">
+            {rec.coverUrl ? (
+              <Image src={rec.coverUrl} alt={rec.title} width={56} height={84} className="rounded-md object-cover shadow-sm" />
+            ) : (
+              <div className="w-14 h-[84px] rounded-md bg-muted flex items-center justify-center px-1">
+                <span className="text-[10px] text-muted-foreground text-center leading-tight">{rec.title}</span>
+              </div>
+            )}
+          </div>
+          <div className="flex-1 min-w-0 space-y-1.5">
+            <p className="font-semibold text-sm leading-snug">{rec.title}</p>
+            <p className="text-xs text-muted-foreground">{rec.author}</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">{rec.reason}</p>
+            {renderAction && <div className="pt-0.5">{renderAction(rec)}</div>}
+          </div>
+        </motion.li>
+      ))}
+    </ul>
+  )
+}
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add components/recommendations/selected-books-list.tsx components/recommendations/recommendation-results.tsx
+git commit -m "feat: add SelectedBooksList and RecommendationResults components"
+```
+
+---
+
+### Task 17: Public `/discover` page
+
+**Files:**
+- Create: `app/discover/page.tsx`
+
+- [ ] **Step 1: Create `app/discover/page.tsx`**
+
+```typescript
+'use client'
+
+import { useState, useEffect } from 'react'
+import { FloatingBooksBg } from '@/components/recommendations/floating-books-bg'
+import { BookInputSearch } from '@/components/recommendations/book-input-search'
+import { SelectedBooksList } from '@/components/recommendations/selected-books-list'
+import { RecommendationResults } from '@/components/recommendations/recommendation-results'
+import { Button } from '@/components/ui/button'
+import type { InputBook, Recommendation } from '@/lib/types'
+
+const LOADING_MESSAGES = ['Analysing your taste…', 'Finding patterns…', 'Almost there…']
+const MAX_BOOKS = 5
+
+export default function DiscoverPage() {
+  const [selectedBooks, setSelectedBooks] = useState<InputBook[]>([])
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([])
+  const [loading, setLoading] = useState(false)
+  const [loadingMsgIdx, setLoadingMsgIdx] = useState(0)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!loading) return
+    setLoadingMsgIdx(0)
+    const interval = setInterval(() => setLoadingMsgIdx(i => (i + 1) % LOADING_MESSAGES.length), 1500)
+    return () => clearInterval(interval)
+  }, [loading])
+
+  function handleAdd(book: InputBook) {
+    if (selectedBooks.length >= MAX_BOOKS || selectedBooks.some(b => b.id === book.id)) return
+    setSelectedBooks(prev => [...prev, book])
+  }
+
+  async function handleSubmit() {
+    if (selectedBooks.length < 2) return
+    setLoading(true)
+    setError(null)
+    setRecommendations([])
+    try {
+      const res = await fetch('/api/recommend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ books: selectedBooks.map(b => ({ title: b.title, author: b.author })) }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Something went wrong')
+      setRecommendations(data.recommendations)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="relative min-h-screen overflow-hidden">
+      <FloatingBooksBg />
+      <div className="relative z-10 max-w-2xl mx-auto px-4 py-16">
+        {recommendations.length === 0 ? (
+          <>
+            <div className="text-center mb-10">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground mb-4">
+                AI-Powered · Free · No login required
+              </p>
+              <h1 className="font-serif text-[clamp(2rem,6vw,3.5rem)] font-normal leading-tight tracking-tight mb-4">
+                Find your next<br />favourite read
+              </h1>
+              <p className="text-muted-foreground text-[1.0625rem]">
+                Tell us a few books you've loved — we'll find your next obsession.
+              </p>
+            </div>
+            <div className="space-y-4">
+              <BookInputSearch
+                onAdd={handleAdd}
+                selectedIds={selectedBooks.map(b => b.id)}
+                disabled={selectedBooks.length >= MAX_BOOKS || loading}
+                placeholder="Search for a book you love…"
+              />
+              <SelectedBooksList books={selectedBooks} onRemove={id => setSelectedBooks(prev => prev.filter(b => b.id !== id))} />
+              {selectedBooks.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {selectedBooks.length} of {MAX_BOOKS} books selected
+                  {selectedBooks.length < 2 && ' — add at least one more to continue'}
+                </p>
+              )}
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              <Button size="lg" className="w-full" onClick={handleSubmit} disabled={selectedBooks.length < 2 || loading}>
+                {loading ? LOADING_MESSAGES[loadingMsgIdx] : 'Get recommendations →'}
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <h2 className="font-serif text-2xl font-normal mb-6">Your next reads</h2>
+            <RecommendationResults recommendations={recommendations} />
+            <div className="mt-8 text-center">
+              <button type="button" onClick={() => { setSelectedBooks([]); setRecommendations([]); setError(null) }} className="text-sm text-muted-foreground hover:underline cursor-pointer">
+                Start over
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+```
+
+- [ ] **Step 2: Verify `/discover` works end-to-end**
+
+```bash
+npm run dev
+```
+
+Visit `http://localhost:3000/discover`. Confirm floating books animate, search dropdown appears with covers, chips animate in/out, cycling loading messages show, results stagger in over ~400ms.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add app/discover/
+git commit -m "feat: add public /discover page with AI recommendations"
+```
+
+---
+
+### Task 18: ShelfBookPicker, WishlistButton, and in-app `/recommendation` page
+
+**Files:**
+- Create: `components/recommendations/shelf-book-picker.tsx`
+- Create: `components/recommendations/wishlist-button.tsx`
+- Create: `components/recommendations/recommendation-client.tsx`
+- Create: `app/recommendation/page.tsx`
+
+- [ ] **Step 1: Create `components/recommendations/shelf-book-picker.tsx`**
+
+```typescript
+'use client'
+
+import Image from 'next/image'
+import { Check } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import type { InputBook } from '@/lib/types'
+
+export interface ShelfBook {
+  id: string         // google_books_id
+  bookId: string     // books.id UUID
+  title: string
+  author: string
+  coverUrl: string | null
+}
+
+interface ShelfBookPickerProps {
+  books: ShelfBook[]
+  selectedIds: string[]
+  onToggle: (book: InputBook) => void
+}
+
+export function ShelfBookPicker({ books, selectedIds, onToggle }: ShelfBookPickerProps) {
+  const selectedSet = new Set(selectedIds)
+
+  if (books.length === 0) {
+    return <p className="text-sm text-muted-foreground py-2">No books on your Read shelf yet.</p>
+  }
+
+  return (
+    <div className="flex gap-3 overflow-x-auto pb-2">
+      {books.map(book => {
+        const selected = selectedSet.has(book.id)
+        return (
+          <button
+            key={book.bookId}
+            type="button"
+            onClick={() => onToggle({ id: book.id, title: book.title, author: book.author, coverUrl: book.coverUrl })}
+            title={book.title}
+            className={cn(
+              'relative flex-shrink-0 rounded-md overflow-hidden transition cursor-pointer',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              selected ? 'ring-2 ring-primary' : 'opacity-60 hover:opacity-100'
+            )}
+          >
+            {book.coverUrl ? (
+              <Image src={book.coverUrl} alt={book.title} width={52} height={78} className="object-cover block" />
+            ) : (
+              <div className="w-[52px] h-[78px] bg-muted flex items-center justify-center px-1">
+                <span className="text-[9px] text-muted-foreground text-center leading-tight">{book.title}</span>
+              </div>
+            )}
+            {selected && (
+              <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                <Check className="w-4 h-4 text-primary drop-shadow-sm" />
+              </div>
+            )}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+```
+
+- [ ] **Step 2: Create `components/recommendations/wishlist-button.tsx`**
+
+```typescript
+'use client'
+
+import { useState, useTransition } from 'react'
+import { Check } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { addBookToShelf, addBookManually } from '@/lib/actions/books'
+import type { Recommendation } from '@/lib/types'
+
+interface WishlistButtonProps {
+  recommendation: Recommendation
+  alreadyOnShelf: boolean
+}
+
+export function WishlistButton({ recommendation, alreadyOnShelf }: WishlistButtonProps) {
+  const [added, setAdded] = useState(false)
+  const [isPending, startTransition] = useTransition()
+
+  if (alreadyOnShelf) {
+    return <span className="text-xs text-muted-foreground">Already on your shelf</span>
+  }
+
+  if (added) {
+    return (
+      <span className="flex items-center gap-1 text-xs text-green-600">
+        <Check className="w-3 h-3" /> Added to Wishlist
+      </span>
+    )
+  }
+
+  function handleAdd() {
+    startTransition(async () => {
+      try {
+        if (recommendation.googleBooksId) {
+          await addBookToShelf(recommendation.googleBooksId, 'wishlist')
+        } else {
+          await addBookManually(
+            { title: recommendation.title, authors: [recommendation.author], coverUrl: recommendation.coverUrl ?? undefined },
+            'wishlist'
+          )
+        }
+        setAdded(true)
+      } catch {
+        // silently fail — user can retry
+      }
+    })
+  }
+
+  return (
+    <Button size="sm" variant="outline" onClick={handleAdd} disabled={isPending}>
+      {isPending ? 'Adding…' : '+ Add to Wishlist'}
+    </Button>
+  )
+}
+```
+
+- [ ] **Step 3: Create `components/recommendations/recommendation-client.tsx`**
+
+```typescript
+'use client'
+
+import { useState, useEffect } from 'react'
+import { FloatingBooksBg } from './floating-books-bg'
+import { BookInputSearch } from './book-input-search'
+import { SelectedBooksList } from './selected-books-list'
+import { RecommendationResults } from './recommendation-results'
+import { ShelfBookPicker, type ShelfBook } from './shelf-book-picker'
+import { WishlistButton } from './wishlist-button'
+import { Button } from '@/components/ui/button'
+import type { InputBook, Recommendation } from '@/lib/types'
+
+export { type ShelfBook }
+
+const LOADING_MESSAGES = ['Analysing your taste…', 'Finding patterns…', 'Almost there…']
+const MAX_BOOKS = 5
+
+interface RecommendationClientProps {
+  shelfBooks: ShelfBook[]
+  existingGoogleBooksIds: string[]
+}
+
+export function RecommendationClient({ shelfBooks, existingGoogleBooksIds }: RecommendationClientProps) {
+  const [selectedBooks, setSelectedBooks] = useState<InputBook[]>([])
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([])
+  const [loading, setLoading] = useState(false)
+  const [loadingMsgIdx, setLoadingMsgIdx] = useState(0)
+  const [error, setError] = useState<string | null>(null)
+  const existingSet = new Set(existingGoogleBooksIds)
+
+  useEffect(() => {
+    if (!loading) return
+    setLoadingMsgIdx(0)
+    const interval = setInterval(() => setLoadingMsgIdx(i => (i + 1) % LOADING_MESSAGES.length), 1500)
+    return () => clearInterval(interval)
+  }, [loading])
+
+  function handleAdd(book: InputBook) {
+    if (selectedBooks.length >= MAX_BOOKS || selectedBooks.some(b => b.id === book.id)) return
+    setSelectedBooks(prev => [...prev, book])
+  }
+
+  function handleToggle(book: InputBook) {
+    if (selectedBooks.some(b => b.id === book.id)) {
+      setSelectedBooks(prev => prev.filter(b => b.id !== book.id))
+    } else {
+      handleAdd(book)
+    }
+  }
+
+  async function handleSubmit() {
+    if (selectedBooks.length < 2) return
+    setLoading(true)
+    setError(null)
+    setRecommendations([])
+    try {
+      const res = await fetch('/api/recommend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ books: selectedBooks.map(b => ({ title: b.title, author: b.author })) }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Something went wrong')
+      setRecommendations(data.recommendations)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const selectedIds = selectedBooks.map(b => b.id)
+
+  return (
+    <div className="relative min-h-[calc(100vh-4rem)] overflow-hidden">
+      <FloatingBooksBg />
+      <div className="relative z-10 max-w-2xl mx-auto px-4 py-12">
+        {recommendations.length === 0 ? (
+          <>
+            <div className="mb-8">
+              <h1 className="font-serif text-[clamp(1.75rem,5vw,2.75rem)] font-normal leading-tight tracking-tight mb-2">
+                What should I read next?
+              </h1>
+              <p className="text-muted-foreground">
+                Pick from your shelf or search any title — we'll find what fits your taste.
+              </p>
+            </div>
+            <div className="space-y-6">
+              {shelfBooks.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium mb-3">From your Read shelf</p>
+                  <ShelfBookPicker books={shelfBooks} selectedIds={selectedIds} onToggle={handleToggle} />
+                </div>
+              )}
+              <div>
+                <p className="text-sm font-medium mb-3">Or search any book</p>
+                <BookInputSearch onAdd={handleAdd} selectedIds={selectedIds} disabled={selectedBooks.length >= MAX_BOOKS || loading} />
+              </div>
+              <SelectedBooksList books={selectedBooks} onRemove={id => setSelectedBooks(prev => prev.filter(b => b.id !== id))} />
+              {selectedBooks.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {selectedBooks.length} of {MAX_BOOKS} selected
+                  {selectedBooks.length < 2 && ' — add at least one more to continue'}
+                </p>
+              )}
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              <Button size="lg" className="w-full" onClick={handleSubmit} disabled={selectedBooks.length < 2 || loading}>
+                {loading ? LOADING_MESSAGES[loadingMsgIdx] : 'Get recommendations →'}
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <h2 className="font-serif text-2xl font-normal mb-6">Your next reads</h2>
+            <RecommendationResults
+              recommendations={recommendations}
+              renderAction={rec => (
+                <WishlistButton
+                  recommendation={rec}
+                  alreadyOnShelf={!!rec.googleBooksId && existingSet.has(rec.googleBooksId)}
+                />
+              )}
+            />
+            <div className="mt-8 text-center">
+              <button type="button" onClick={() => { setSelectedBooks([]); setRecommendations([]); setError(null) }} className="text-sm text-muted-foreground hover:underline cursor-pointer">
+                Start over
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+```
+
+- [ ] **Step 4: Create `app/recommendation/page.tsx`**
+
+```typescript
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import { RecommendationClient, type ShelfBook } from '@/components/recommendations/recommendation-client'
+
+export default async function RecommendationPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const [{ data: readEntries }, { data: allEntries }] = await Promise.all([
+    supabase
+      .from('shelf_entries')
+      .select('book:books(id, google_books_id, title, authors, cover_url)')
+      .eq('user_id', user.id)
+      .eq('status', 'read')
+      .order('updated_at', { ascending: false })
+      .limit(20),
+    supabase
+      .from('shelf_entries')
+      .select('book:books(google_books_id)')
+      .eq('user_id', user.id),
+  ])
+
+  const shelfBooks: ShelfBook[] = (readEntries ?? [])
+    .map((e: any) => e.book)
+    .filter((b: any) => b?.google_books_id)
+    .map((b: any) => ({
+      id: b.google_books_id as string,
+      bookId: b.id as string,
+      title: b.title as string,
+      author: (b.authors as string[])?.[0] ?? '',
+      coverUrl: b.cover_url as string | null,
+    }))
+
+  const existingGoogleBooksIds: string[] = (allEntries ?? [])
+    .map((e: any) => e.book?.google_books_id)
+    .filter(Boolean) as string[]
+
+  return (
+    <RecommendationClient
+      shelfBooks={shelfBooks}
+      existingGoogleBooksIds={existingGoogleBooksIds}
+    />
+  )
+}
+```
+
+- [ ] **Step 5: Verify `/recommendation` works end-to-end**
+
+```bash
+npm run dev
+```
+
+Log in and visit `http://localhost:3000/recommendation`. Confirm shelf books appear, selection works, recommendations load with "Add to Wishlist" per card, button transforms to "✓ Added" after adding.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add components/recommendations/ app/recommendation/
+git commit -m "feat: add in-app /recommendation page with shelf picker and wishlist actions"
+```
+
+---
+
+### Task 19: Navigation and landing page wiring
+
+**Files:**
+- Modify: `components/layout/navbar.tsx`
+- Modify: `components/layout/mobile-menu.tsx`
+- Modify: `components/landing/landing-page.tsx`
+
+- [ ] **Step 1: Add "Recommendation" link to `components/layout/navbar.tsx`**
+
+In the `hidden sm:flex` div, change:
+
+```typescript
+<Link href="/feed" className={cn(buttonVariants({ variant: 'ghost' }))}>Feed</Link>
+<Link href="/find-people" className={cn(buttonVariants({ variant: 'ghost' }))}>Find People</Link>
+```
+
+To:
+
+```typescript
+<Link href="/feed" className={cn(buttonVariants({ variant: 'ghost' }))}>Feed</Link>
+<Link href="/recommendation" className={cn(buttonVariants({ variant: 'ghost' }))}>Recommendation</Link>
+<Link href="/find-people" className={cn(buttonVariants({ variant: 'ghost' }))}>Find People</Link>
+```
+
+- [ ] **Step 2: Add "Recommendation" link to `components/layout/mobile-menu.tsx`**
+
+Between the Feed and Find People links, insert:
+
+```typescript
+<Link
+  href="/recommendation"
+  onClick={() => setOpen(false)}
+  className={cn(buttonVariants({ variant: 'ghost' }), 'justify-start')}
+>
+  Recommendation
+</Link>
+```
+
+- [ ] **Step 3: Add "Try AI Recommendations →" CTA to `components/landing/landing-page.tsx`**
+
+Find the `FadeUp` block with the hero CTA buttons and add a third button:
+
+```typescript
+<FadeUp delay={0.34} className="mt-10 flex flex-wrap justify-center gap-3">
+  <Link href="/signup" className={cn(buttonVariants({ size: 'lg' }))}>
+    Get started
+  </Link>
+  <Link href="/login" className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}>
+    Log in
+  </Link>
+  <Link href="/discover" className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}>
+    Try AI Recommendations →
+  </Link>
+</FadeUp>
+```
+
+- [ ] **Step 4: Run the full test suite**
+
+```bash
+npm run test:run
+```
+
+Expected: All tests pass.
+
+- [ ] **Step 5: Verify the full feature end-to-end**
+
+```bash
+npm run dev
+```
+
+Check all three entry points:
+1. `http://localhost:3000` — "Try AI Recommendations →" appears in the hero, links to `/discover`
+2. `/discover` — full public flow works (search, select, generate, staggered results)
+3. Log in → "Recommendation" in navbar between "Feed" and "Find People"
+4. `/recommendation` — shelf row, search, recommendations with "Add to Wishlist"
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add components/layout/navbar.tsx components/layout/mobile-menu.tsx components/landing/landing-page.tsx
+git commit -m "feat: wire Recommendation into navbar, mobile menu, and landing page hero"
+```
+
+---
+
+**✅ PHASE 7 MILESTONE: AI book recommendations live on /discover (public) and /recommendation (in-app)**
+Update the Project Status table at the top of this file to ✅ Complete.
+
+---
+
+## Deployment Checklist (Phase 7 additions)
+
+Before deploying Phase 7:
+
+- [ ] `ANTHROPIC_API_KEY` added to Vercel environment variables
+- [ ] `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` added to Vercel environment variables
+- [ ] Monthly spending cap set in Anthropic console (Billing → Limits)
+- [ ] Run `npm run build` locally — zero errors
+- [ ] Run `npm run test:run` — all tests pass
+- [ ] Deploy: `vercel --prod`

@@ -25,3 +25,19 @@ export type ActivityWithDetails = Activity & {
   user_has_liked: boolean
   comments: CommentWithProfile[]
 }
+
+// Recommendation feature types
+export interface InputBook {
+  id: string           // google_books_id — used as selection key
+  title: string
+  author: string
+  coverUrl: string | null
+}
+
+export interface Recommendation {
+  title: string
+  author: string
+  reason: string
+  coverUrl: string | null
+  googleBooksId: string | null
+}
