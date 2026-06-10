@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import type { GoogleBook } from '@/lib/google-books'
+import { searchBooksAction } from '@/lib/actions/search'
 import type { InputBook } from '@/lib/types'
 
 interface BookInputSearchProps {
@@ -24,6 +25,7 @@ export function BookInputSearch({
   const [open, setOpen] = useState(false)
   const [searching, setSearching] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const searchIdRef = useRef(0)
   const containerRef = useRef<HTMLDivElement>(null)
   const selectedSet = new Set(selectedIds)
 
@@ -32,18 +34,19 @@ export function BookInputSearch({
     const trimmed = query.trim()
     if (trimmed.length < 2) { setResults([]); setOpen(false); return }
     debounceRef.current = setTimeout(async () => {
+      const id = ++searchIdRef.current
       setSearching(true)
       try {
-        const res = await fetch(`/api/books/search?q=${encodeURIComponent(trimmed)}`)
-        const data = await res.json()
-        const books: GoogleBook[] = data.items ?? []
+        const books = await searchBooksAction(trimmed)
+        if (searchIdRef.current !== id) return
         setResults(books.slice(0, 6))
         setOpen(books.length > 0)
       } catch {
+        if (searchIdRef.current !== id) return
         setResults([])
         setOpen(false)
       } finally {
-        setSearching(false)
+        if (searchIdRef.current === id) setSearching(false)
       }
     }, 300)
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
