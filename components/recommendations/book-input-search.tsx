@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
-import { searchBooks, type GoogleBook } from '@/lib/google-books'
+import type { GoogleBook } from '@/lib/google-books'
 import type { InputBook } from '@/lib/types'
 
 interface BookInputSearchProps {
@@ -34,7 +34,9 @@ export function BookInputSearch({
     debounceRef.current = setTimeout(async () => {
       setSearching(true)
       try {
-        const books = await searchBooks(trimmed)
+        const res = await fetch(`/api/books/search?q=${encodeURIComponent(trimmed)}`)
+        const data = await res.json()
+        const books: GoogleBook[] = data.items ?? []
         setResults(books.slice(0, 6))
         setOpen(books.length > 0)
       } catch {
