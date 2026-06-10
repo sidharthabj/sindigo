@@ -80,13 +80,15 @@ export async function POST(request: NextRequest) {
     const message = await anthropic.messages.create({
       model: 'claude-haiku-4-5',
       max_tokens: 1024,
-      temperature: 0.7,
       messages: [{ role: 'user', content: prompt }],
     })
-    const text = message.content[0].type === 'text' ? message.content[0].text : ''
-    rawRecs = JSON.parse(text.trim())
+    const raw = message.content[0].type === 'text' ? message.content[0].text : ''
+    // Strip markdown code fences if present
+    const text = raw.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
+    rawRecs = JSON.parse(text)
     if (!Array.isArray(rawRecs) || rawRecs.length === 0) throw new Error('Invalid format')
-  } catch {
+  } catch (err) {
+    console.error('[/api/recommend] Anthropic call failed:', err)
     return NextResponse.json(
       { error: 'Failed to generate recommendations. Please try again.' },
       { status: 500 }
