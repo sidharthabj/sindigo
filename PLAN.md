@@ -3037,7 +3037,7 @@ UPSTASH_REDIS_REST_TOKEN=
 
 Get the Anthropic API key from [console.anthropic.com](https://console.anthropic.com) → API Keys → Create key. Set a monthly spending limit in the console under Billing → Limits before using the key.
 
-- [ ] **Step 3: Set up Upstash Redis**
+- [x] **Step 3: Set up Upstash Redis**
 
 Go to [vercel.com/integrations](https://vercel.com/integrations) → search "Upstash" → add to your Sindigo project. Upstash will create a Redis database and auto-populate `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` in Vercel env vars.
 
@@ -3079,7 +3079,7 @@ To:
 export const PROTECTED_ROUTES = ['/feed', '/search', '/settings', '/find-people', '/recommendation']
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add lib/types/index.ts proxy.ts package.json package-lock.json
@@ -3096,7 +3096,7 @@ git commit -m "feat: install AI recommendation deps and add types and route prot
 - Create: `lib/recommendations/cover.ts`
 - Create: `app/api/recommend/route.ts`
 
-- [ ] **Step 1: Write failing tests for `validateBooks`**
+- [x] **Step 1: Write failing tests for `validateBooks`**
 
 Create `lib/recommendations/validate.test.ts`:
 
@@ -3160,7 +3160,7 @@ describe('validateBooks', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail**
+- [x] **Step 2: Run tests to confirm they fail**
 
 ```bash
 npm run test:run lib/recommendations/validate.test.ts
@@ -3168,7 +3168,7 @@ npm run test:run lib/recommendations/validate.test.ts
 
 Expected: FAIL — `validate.ts` does not exist yet.
 
-- [ ] **Step 3: Create `lib/recommendations/validate.ts`**
+- [x] **Step 3: Create `lib/recommendations/validate.ts`**
 
 ```typescript
 export interface InputBookRaw {
@@ -3190,7 +3190,7 @@ export function validateBooks(books: unknown): books is InputBookRaw[] {
 }
 ```
 
-- [ ] **Step 4: Run tests to confirm they pass**
+- [x] **Step 4: Run tests to confirm they pass**
 
 ```bash
 npm run test:run lib/recommendations/validate.test.ts
@@ -3198,7 +3198,7 @@ npm run test:run lib/recommendations/validate.test.ts
 
 Expected: 12 tests PASS.
 
-- [ ] **Step 5: Create `lib/recommendations/cover.ts`**
+- [x] **Step 5: Create `lib/recommendations/cover.ts`**
 
 ```typescript
 export async function fetchCoverAndId(
@@ -3229,7 +3229,7 @@ export async function fetchCoverAndId(
 }
 ```
 
-- [ ] **Step 6: Create `app/api/recommend/route.ts`**
+- [x] **Step 6: Create `app/api/recommend/route.ts`**
 
 ```typescript
 import { NextRequest, NextResponse } from 'next/server'
@@ -3338,7 +3338,7 @@ export async function POST(request: NextRequest) {
 }
 ```
 
-- [ ] **Step 7: Run the full test suite**
+- [x] **Step 7: Run the full test suite**
 
 ```bash
 npm run test:run
@@ -3346,7 +3346,7 @@ npm run test:run
 
 Expected: All existing tests plus the 12 new validation tests PASS.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add lib/recommendations/ app/api/recommend/
@@ -3361,7 +3361,7 @@ git commit -m "feat: add validateBooks utility and /api/recommend route with rat
 - Create: `components/recommendations/floating-books-bg.tsx`
 - Create: `components/recommendations/book-input-search.tsx`
 
-- [ ] **Step 1: Create `components/recommendations/floating-books-bg.tsx`**
+- [x] **Step 1: Create `components/recommendations/floating-books-bg.tsx`**
 
 ```typescript
 'use client'
@@ -3411,7 +3411,7 @@ export function FloatingBooksBg() {
 }
 ```
 
-- [ ] **Step 2: Create `components/recommendations/book-input-search.tsx`**
+- [x] **Step 2: Create `components/recommendations/book-input-search.tsx`**
 
 ```typescript
 'use client'
@@ -3544,7 +3544,7 @@ export function BookInputSearch({
 }
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add components/recommendations/
@@ -3559,7 +3559,7 @@ git commit -m "feat: add FloatingBooksBg and BookInputSearch components"
 - Create: `components/recommendations/selected-books-list.tsx`
 - Create: `components/recommendations/recommendation-results.tsx`
 
-- [ ] **Step 1: Create `components/recommendations/selected-books-list.tsx`**
+- [x] **Step 1: Create `components/recommendations/selected-books-list.tsx`**
 
 ```typescript
 'use client'
@@ -3612,7 +3612,7 @@ export function SelectedBooksList({ books, onRemove }: SelectedBooksListProps) {
 }
 ```
 
-- [ ] **Step 2: Create `components/recommendations/recommendation-results.tsx`**
+- [x] **Step 2: Create `components/recommendations/recommendation-results.tsx`**
 
 ```typescript
 'use client'
@@ -3659,7 +3659,7 @@ export function RecommendationResults({ recommendations, renderAction }: Recomme
 }
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add components/recommendations/selected-books-list.tsx components/recommendations/recommendation-results.tsx
@@ -3673,7 +3673,7 @@ git commit -m "feat: add SelectedBooksList and RecommendationResults components"
 **Files:**
 - Create: `app/discover/page.tsx`
 
-- [ ] **Step 1: Create `app/discover/page.tsx`**
+- [x] **Step 1: Create `app/discover/page.tsx`**
 
 ```typescript
 'use client'
@@ -3783,7 +3783,7 @@ export default function DiscoverPage() {
 }
 ```
 
-- [ ] **Step 2: Verify `/discover` works end-to-end**
+- [x] **Step 2: Verify `/discover` works end-to-end**
 
 ```bash
 npm run dev
@@ -3791,7 +3791,7 @@ npm run dev
 
 Visit `http://localhost:3000/discover`. Confirm floating books animate, search dropdown appears with covers, chips animate in/out, cycling loading messages show, results stagger in over ~400ms.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add app/discover/
@@ -3808,7 +3808,7 @@ git commit -m "feat: add public /discover page with AI recommendations"
 - Create: `components/recommendations/recommendation-client.tsx`
 - Create: `app/recommendation/page.tsx`
 
-- [ ] **Step 1: Create `components/recommendations/shelf-book-picker.tsx`**
+- [x] **Step 1: Create `components/recommendations/shelf-book-picker.tsx`**
 
 ```typescript
 'use client'
@@ -3875,7 +3875,7 @@ export function ShelfBookPicker({ books, selectedIds, onToggle }: ShelfBookPicke
 }
 ```
 
-- [ ] **Step 2: Create `components/recommendations/wishlist-button.tsx`**
+- [x] **Step 2: Create `components/recommendations/wishlist-button.tsx`**
 
 ```typescript
 'use client'
@@ -3933,7 +3933,7 @@ export function WishlistButton({ recommendation, alreadyOnShelf }: WishlistButto
 }
 ```
 
-- [ ] **Step 3: Create `components/recommendations/recommendation-client.tsx`**
+- [x] **Step 3: Create `components/recommendations/recommendation-client.tsx`**
 
 ```typescript
 'use client'
@@ -4072,7 +4072,7 @@ export function RecommendationClient({ shelfBooks, existingGoogleBooksIds }: Rec
 }
 ```
 
-- [ ] **Step 4: Create `app/recommendation/page.tsx`**
+- [x] **Step 4: Create `app/recommendation/page.tsx`**
 
 ```typescript
 import { createClient } from '@/lib/supabase/server'
@@ -4122,7 +4122,7 @@ export default async function RecommendationPage() {
 }
 ```
 
-- [ ] **Step 5: Verify `/recommendation` works end-to-end**
+- [x] **Step 5: Verify `/recommendation` works end-to-end**
 
 ```bash
 npm run dev
@@ -4130,7 +4130,7 @@ npm run dev
 
 Log in and visit `http://localhost:3000/recommendation`. Confirm shelf books appear, selection works, recommendations load with "Add to Wishlist" per card, button transforms to "✓ Added" after adding.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add components/recommendations/ app/recommendation/
@@ -4146,7 +4146,7 @@ git commit -m "feat: add in-app /recommendation page with shelf picker and wishl
 - Modify: `components/layout/mobile-menu.tsx`
 - Modify: `components/landing/landing-page.tsx`
 
-- [ ] **Step 1: Add "Recommendation" link to `components/layout/navbar.tsx`**
+- [x] **Step 1: Add "Recommendation" link to `components/layout/navbar.tsx`**
 
 In the `hidden sm:flex` div, change:
 
@@ -4163,7 +4163,7 @@ To:
 <Link href="/find-people" className={cn(buttonVariants({ variant: 'ghost' }))}>Find People</Link>
 ```
 
-- [ ] **Step 2: Add "Recommendation" link to `components/layout/mobile-menu.tsx`**
+- [x] **Step 2: Add "Recommendation" link to `components/layout/mobile-menu.tsx`**
 
 Between the Feed and Find People links, insert:
 
@@ -4177,7 +4177,7 @@ Between the Feed and Find People links, insert:
 </Link>
 ```
 
-- [ ] **Step 3: Add "Try AI Recommendations →" CTA to `components/landing/landing-page.tsx`**
+- [x] **Step 3: Add "Try AI Recommendations →" CTA to `components/landing/landing-page.tsx`**
 
 Find the `FadeUp` block with the hero CTA buttons and add a third button:
 
@@ -4195,7 +4195,7 @@ Find the `FadeUp` block with the hero CTA buttons and add a third button:
 </FadeUp>
 ```
 
-- [ ] **Step 4: Run the full test suite**
+- [x] **Step 4: Run the full test suite**
 
 ```bash
 npm run test:run
@@ -4203,7 +4203,7 @@ npm run test:run
 
 Expected: All tests pass.
 
-- [ ] **Step 5: Verify the full feature end-to-end**
+- [x] **Step 5: Verify the full feature end-to-end**
 
 ```bash
 npm run dev
@@ -4215,7 +4215,7 @@ Check all three entry points:
 3. Log in → "Recommendation" in navbar between "Feed" and "Find People"
 4. `/recommendation` — shelf row, search, recommendations with "Add to Wishlist"
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add components/layout/navbar.tsx components/layout/mobile-menu.tsx components/landing/landing-page.tsx

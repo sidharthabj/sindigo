@@ -32,6 +32,13 @@ export function MobileMenu({ username }: MobileMenuProps) {
             Feed
           </Link>
           <Link
+            href="/recommendation"
+            onClick={() => setOpen(false)}
+            className={cn(buttonVariants({ variant: 'ghost' }), 'justify-start')}
+          >
+            Recommendation
+          </Link>
+          <Link
             href="/find-people"
             onClick={() => setOpen(false)}
             className={cn(buttonVariants({ variant: 'ghost' }), 'justify-start')}

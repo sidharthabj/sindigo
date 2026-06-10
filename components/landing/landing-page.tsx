@@ -44,6 +44,9 @@ export function LandingPage() {
           <Link href="/login" className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}>
             Log in
           </Link>
+          <Link href="/discover" className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}>
+            Try AI Recommendations →
+          </Link>
         </FadeUp>
 
         <ScrollIndicator />

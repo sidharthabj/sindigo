@@ -27,6 +27,7 @@ export async function Navbar() {
         <>
           <div className="hidden sm:flex gap-2">
             <Link href="/feed" className={cn(buttonVariants({ variant: 'ghost' }))}>Feed</Link>
+            <Link href="/recommendation" className={cn(buttonVariants({ variant: 'ghost' }))}>Recommendation</Link>
             <Link href="/find-people" className={cn(buttonVariants({ variant: 'ghost' }))}>Find People</Link>
             <Link href="/search" className={cn(buttonVariants({ variant: 'ghost' }))}>Add Book</Link>
             {username && (
