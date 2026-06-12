@@ -10,10 +10,8 @@ import Link from 'next/link'
 
 export function FindPeopleClient() {
   const [query, setQuery] = useState('')
-  const [submittedQuery, setSubmittedQuery] = useState('')
-  const [results, setResults] = useState<UserSearchResult[]>([])
+  const [results, setResults] = useState<UserSearchResult[] | null>(null)
   const [loading, setLoading] = useState(false)
-  const [searched, setSearched] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   async function handleSearch(e: React.FormEvent) {
@@ -21,12 +19,9 @@ export function FindPeopleClient() {
     if (!query.trim()) return
     setLoading(true)
     setError(null)
-    const currentQuery = query.trim()
     try {
-      const users = await searchUsersAction(currentQuery)
+      const users = await searchUsersAction(query.trim())
       setResults(users)
-      setSubmittedQuery(currentQuery)
-      setSearched(true)
     } catch (err: any) {
       setError(err.message ?? 'Something went wrong. Please try again.')
     } finally {
@@ -51,12 +46,12 @@ export function FindPeopleClient() {
 
       {error && <p className="text-sm text-red-500 mb-4">{error}</p>}
 
-      {searched && results.length === 0 && !error && (
-        <p className="text-muted-foreground text-sm">No users found for "{submittedQuery}".</p>
+      {results !== null && results.length === 0 && !error && (
+        <p className="text-muted-foreground text-sm">No users found for "{query}".</p>
       )}
 
       <ul className="space-y-3">
-        {results.map(user => (
+        {(results ?? []).map(user => (
           <li key={user.id} className="flex items-center justify-between gap-4 py-3 border-b last:border-0">
             <div className="flex items-center gap-3 min-w-0">
               <Link href={`/${user.username}`} className="shrink-0">

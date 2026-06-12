@@ -34,13 +34,14 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
   const { pathname } = request.nextUrl
 
   // Allow Supabase auth callback and API routes through unconditionally
   if (pathname.startsWith('/auth/') || pathname.startsWith('/api/')) {
     return supabaseResponse
   }
+
+  const { data: { user } } = await supabase.auth.getUser()
 
   // Redirect logged-in users away from auth pages
   if (AUTH_ONLY_PATHS.has(pathname) && user) {

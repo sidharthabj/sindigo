@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface Props {
@@ -19,6 +19,7 @@ interface Props {
 }
 
 export function SettingsClient({ initialDisplayName, initialUsername, initialBio, initialAvatarUrl, userId }: Props) {
+  const supabase = createClient()
   const router = useRouter()
   const [displayName, setDisplayName] = useState(initialDisplayName)
   const [username, setUsername] = useState(initialUsername)
@@ -55,7 +56,6 @@ export function SettingsClient({ initialDisplayName, initialUsername, initialBio
     setUploadingAvatar(true)
     setErrorMessage(null)
     try {
-      const supabase = createClient()
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(path, file, { upsert: false })
@@ -100,7 +100,6 @@ export function SettingsClient({ initialDisplayName, initialUsername, initialBio
   }
 
   async function handleSignOut() {
-    const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/')
     router.refresh()
