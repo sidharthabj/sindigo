@@ -20,7 +20,7 @@ export async function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 border-b px-4 py-3 flex items-center justify-between relative backdrop-blur-md bg-background/80">
-      <Link href={user ? '/feed' : '/'} className="font-bold text-lg tracking-tight">
+      <Link href={user ? '/feed' : '/'} className="font-bold text-2xl tracking-tight">
         Sindigo
       </Link>
       {user ? (
