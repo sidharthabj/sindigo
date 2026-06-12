@@ -1,11 +1,10 @@
-import { createClient } from '@/lib/supabase/server'
+import { getUser } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { BookSearchModal } from '@/components/books/book-search-modal'
 import { Button } from '@/components/ui/button'
 
 export default async function SearchPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getUser()
   if (!user) redirect('/login')
 
   return (

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getUser } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import Image from 'next/image'
 import { BookOpeningAnimation } from '@/components/books/book-opening-animation'
@@ -45,8 +45,7 @@ export default async function BookDetailPage({
   params: Promise<{ username: string; bookId: string }>
 }) {
   const { username, bookId } = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const [supabase, user] = await Promise.all([createClient(), getUser()])
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase
