@@ -1,7 +1,13 @@
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import { BookSearchModal } from '@/components/books/book-search-modal'
 import { Button } from '@/components/ui/button'
 
-export default function SearchPage() {
+export default async function SearchPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-12 text-center">
       <h1 className="text-2xl font-bold mb-2">Add a book</h1>

@@ -27,6 +27,22 @@ npm run test       # Watch mode tests
 npm run test:run   # Single test run (CI)
 ```
 
+## Authentication Rules
+
+**Every page route requires auth by default.** `proxy.ts` (Next.js 16's equivalent of middleware) enforces this at the edge. Individual page files also add a server-side `redirect('/login')` as defence-in-depth.
+
+**Explicitly public routes** (the only exceptions — must be listed in `proxy.ts` `PUBLIC_PATHS`):
+- `/` — landing page
+- `/login`, `/signup`, `/forgot-password`, `/reset-password` — auth flows
+- `/discover` — intentionally public AI recommendation tool
+- `/auth/*` — Supabase OAuth callbacks
+- `/api/*` — API routes (guard individually inside the route handler if needed)
+
+**When adding a new page route:**
+1. If it should be protected (default): add `const { data: { user } } = await supabase.auth.getUser(); if (!user) redirect('/login')` at the top of the server component.
+2. If it should be public: add its path to `PUBLIC_PATHS` in `proxy.ts` with a comment explaining why.
+3. If it is a `'use client'` page: create a server component `page.tsx` that checks auth and renders the client component — never rely on a client-side `useEffect` redirect as the sole auth guard.
+
 ## Key Conventions
 
 - **Supabase clients:** Use `lib/supabase/server.ts` in Server Components and Server Actions; `lib/supabase/client.ts` in Client Components only.

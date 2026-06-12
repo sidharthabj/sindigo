@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { ProfileHeader } from '@/components/profile/profile-header'
 import { ShelfSection } from '@/components/books/shelf-section'
 import type { ShelfEntryWithBook } from '@/lib/types'
@@ -9,6 +9,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
   const { data: profile } = await supabase
     .from('profiles')

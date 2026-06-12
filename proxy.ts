@@ -1,8 +1,18 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export const PROTECTED_ROUTES = ['/feed', '/search', '/settings', '/find-people', '/recommendation']
-export const AUTH_ROUTES = ['/login', '/signup']
+// Routes that do NOT require authentication. Everything else is protected.
+const PUBLIC_PATHS = new Set([
+  '/',
+  '/login',
+  '/signup',
+  '/forgot-password',
+  '/reset-password',
+  '/discover',
+])
+
+// Routes that redirect logged-in users away (auth-only pages)
+const AUTH_ONLY_PATHS = new Set(['/login', '/signup'])
 
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -27,14 +37,21 @@ export async function proxy(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   const { pathname } = request.nextUrl
 
-  const isProtected = PROTECTED_ROUTES.some(r => pathname.startsWith(r))
-  const isAuthRoute = AUTH_ROUTES.some(r => pathname.startsWith(r))
-
-  if (isProtected && !user) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  // Allow Supabase auth callback and API routes through unconditionally
+  if (pathname.startsWith('/auth/') || pathname.startsWith('/api/')) {
+    return supabaseResponse
   }
-  if ((isAuthRoute || pathname === '/') && user) {
+
+  // Redirect logged-in users away from auth pages
+  if (AUTH_ONLY_PATHS.has(pathname) && user) {
     return NextResponse.redirect(new URL('/feed', request.url))
+  }
+
+  // Protect everything that isn't explicitly public
+  if (!PUBLIC_PATHS.has(pathname) && !user) {
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('next', pathname)
+    return NextResponse.redirect(loginUrl)
   }
 
   return supabaseResponse

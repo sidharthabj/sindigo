@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Image from 'next/image'
 import { BookOpeningAnimation } from '@/components/books/book-opening-animation'
 import { Rating } from '@/components/books/rating'
@@ -47,6 +47,7 @@ export default async function BookDetailPage({
   const { username, bookId } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
   const { data: profile } = await supabase
     .from('profiles').select('id').eq('username', username).single()
