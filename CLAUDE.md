@@ -6,6 +6,7 @@ A social reading tracker. Users maintain three shelves (Wishlist, Currently Read
 
 - Full design spec: `docs/superpowers/specs/2026-06-06-sindigo-design.md`
 - Implementation plan (phases + tasks): `PLAN.md` — check the Project Status table at the top to see which phase is current
+- Documented solutions: `docs/solutions/` — searchable knowledge base of past bugs and best practices, organized by category with YAML frontmatter (`module`, `tags`, `problem_type`)
 
 ## Tech Stack
 
