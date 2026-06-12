@@ -17,17 +17,15 @@ export function LandingPage() {
       <section className="relative flex min-h-screen flex-col items-center justify-center px-6 pb-24 pt-16 text-center">
         <FadeUp delay={0} className="mb-7">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-            A reading life worth keeping
+            Where serious readers belong
           </p>
         </FadeUp>
 
         <FadeUp delay={0.1}>
           <h1 className="font-serif text-[clamp(2.75rem,7.5vw,6.5rem)] font-normal leading-[1.04] tracking-[-0.01em]">
-            Your books.
+            All your books.
             <br />
-            Your voice.
-            <br />
-            Your shelf.
+            One place.
           </h1>
         </FadeUp>
 
@@ -66,17 +64,17 @@ export function LandingPage() {
                 A place for every book
               </h2>
               <p className="max-w-[42ch] text-[1rem] leading-relaxed text-muted-foreground">
-                Wishlist. Reading. Read. Your entire reading life, organized without the clutter. Every book you want, are in, or have finished, always exactly where you left it.
+                All your books in three places: what you want, what you&apos;re reading, what you&apos;ve finished. Clean, simple, yours.
               </p>
             </div>
 
             <div className="overflow-hidden rounded-xl" style={FRAME_STYLE}>
-              <div className="overflow-hidden" style={{ maxHeight: 360 }}>
+              <div className="overflow-hidden" style={{ maxHeight: 520 }}>
                 <Image
                   src="/screenshots/profile.png"
                   alt="Sindigo bookshelves showing Read and Wishlist"
                   width={960}
-                  height={360}
+                  height={520}
                   sizes="(max-width: 768px) 100vw, 50vw"
                   className="w-full object-cover object-top"
                   priority
@@ -88,12 +86,12 @@ export function LandingPage() {
           {/* 2 — Notes */}
           <InView className="grid items-center gap-16 md:grid-cols-2">
             <div className="order-2 overflow-hidden rounded-xl md:order-1" style={FRAME_STYLE}>
-              <div className="overflow-hidden" style={{ maxHeight: 360 }}>
+              <div className="overflow-hidden" style={{ maxHeight: 520 }}>
                 <Image
                   src="/screenshots/book-detail.png"
                   alt="Book detail page with rating and review"
                   width={960}
-                  height={360}
+                  height={520}
                   sizes="(max-width: 768px) 100vw, 50vw"
                   className="w-full object-cover object-top"
                 />
@@ -128,12 +126,12 @@ export function LandingPage() {
             </div>
 
             <div className="overflow-hidden rounded-xl" style={FRAME_STYLE}>
-              <div className="overflow-hidden" style={{ maxHeight: 360 }}>
+              <div className="overflow-hidden" style={{ maxHeight: 520 }}>
                 <Image
                   src="/screenshots/feed.png"
                   alt="Activity feed showing friends' reading"
                   width={960}
-                  height={360}
+                  height={520}
                   sizes="(max-width: 768px) 100vw, 50vw"
                   className="w-full object-cover object-top"
                 />
