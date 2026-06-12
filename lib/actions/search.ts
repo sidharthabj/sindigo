@@ -4,10 +4,6 @@ import { createClient } from '@/lib/supabase/server'
 import { searchBooks, type GoogleBook } from '@/lib/google-books'
 
 export async function searchBooksAction(query: string): Promise<GoogleBook[]> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
-
   return searchBooks(query)
 }
 
