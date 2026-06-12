@@ -32,7 +32,7 @@ export function BookInputSearch({
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
     const trimmed = query.trim()
-    if (trimmed.length < 2) { setResults([]); setOpen(false); return }
+    if (trimmed.length < 2) { searchIdRef.current++; setSearching(false); setResults([]); setOpen(false); return }
     debounceRef.current = setTimeout(async () => {
       const id = ++searchIdRef.current
       setSearching(true)
