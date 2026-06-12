@@ -4233,9 +4233,9 @@ Update the Project Status table at the top of this file to ✅ Complete.
 
 Before deploying Phase 7:
 
-- [ ] `ANTHROPIC_API_KEY` added to Vercel environment variables
-- [ ] `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` added to Vercel environment variables
-- [ ] Monthly spending cap set in Anthropic console (Billing → Limits)
-- [ ] Run `npm run build` locally — zero errors
-- [ ] Run `npm run test:run` — all tests pass
-- [ ] Deploy: `vercel --prod`
+- [x] `ANTHROPIC_API_KEY` added to Vercel environment variables
+- [x] `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` added to Vercel environment variables
+- [x] Monthly spending cap set in Anthropic console (Billing → Limits)
+- [x] Run `npm run build` locally — zero errors
+- [x] Run `npm run test:run` — all tests pass
+- [x] Deploy: `vercel --prod`
