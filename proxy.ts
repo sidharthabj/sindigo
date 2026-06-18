@@ -12,7 +12,7 @@ const PUBLIC_PATHS = new Set([
 ])
 
 // Routes that redirect logged-in users away (auth-only pages)
-const AUTH_ONLY_PATHS = new Set(['/login', '/signup'])
+const AUTH_ONLY_PATHS = new Set(['/', '/login', '/signup'])
 
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
